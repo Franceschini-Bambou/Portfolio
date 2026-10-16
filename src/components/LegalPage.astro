@@ -1,0 +1,22 @@
+---
+// Gabarit des pages légales (même univers, lecture confortable)
+import Base from '../layouts/Base.astro';
+import HeroBackdrop from './HeroBackdrop.astro';
+import Window from './Window.astro';
+interface Props { title: string; file: string; description?: string }
+const { title, file, description } = Astro.props;
+---
+<Base title={title} description={description}>
+  <section class="relative overflow-hidden bg-ink">
+    <HeroBackdrop opacity={0.12} />
+    <div class="relative mx-auto flex max-w-[1100px] flex-col gap-8 px-4 pt-8 pb-20 sm:px-6 lg:px-14 lg:pt-12 lg:pb-[110px]">
+      <span class="font-vt text-[20px] text-rose sm:text-[28px]">CH 00 — Service public</span>
+      <h1 class="m-0 font-display text-h2-sm leading-[.9] text-cream chroma-3 sm:chroma-5">{title}</h1>
+      <Window title={file} class="shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]">
+        <div class="legal flex flex-col gap-4 px-5 py-7 leading-[1.6] sm:px-9 sm:py-9 [&_a]:text-bordeaux [&_h2]:m-0 [&_h2]:mt-4 [&_h2]:font-display [&_h2]:text-[clamp(1.4rem,2vw,1.75rem)] [&_h2]:leading-[1.1] [&_h2]:text-bordeaux [&_p]:m-0 [&_ul]:m-0 [&_ul]:pl-6">
+          <slot />
+        </div>
+      </Window>
+    </div>
+  </section>
+</Base>

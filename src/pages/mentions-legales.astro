@@ -1,0 +1,18 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+import { getContent } from '../lib/data';
+const { site } = await getContent();
+---
+<LegalPage title="Mentions légales" file="mentions_legales.txt">
+  <h2>Éditrice du site</h2>
+  <p>Bambou Franceschini — étudiante en BUT MMI, Montbéliard (France).<br />Contact : <a href={`mailto:${site.email}`}>{site.email}</a></p>
+  <p>Directrice de la publication : Bambou Franceschini.</p>
+  <h2>Hébergement</h2>
+  <!-- ⚠️ Vérifie ces informations avec ton offre Infomaniak -->
+  <p>Infomaniak Network SA — Rue Eugène-Marziano 25, 1227 Les Acacias (GE), Suisse — <a href="https://www.infomaniak.com" target="_blank" rel="noopener">www.infomaniak.com</a></p>
+  <h2>Propriété intellectuelle</h2>
+  <p>L'ensemble des contenus de ce site (textes, visuels, vidéos, affiches, logo) est la propriété de Bambou Franceschini, sauf mention contraire. Toute reproduction sans autorisation est interdite.</p>
+  <p>Citation de Milton Glaser reproduite à titre de courte citation.</p>
+  <h2>Crédits</h2>
+  <p>Conception, design et développement : Bambou Franceschini. Site réalisé avec Astro, Tailwind CSS et PocketBase. Polices : Bungee, VT323 et Roboto (licence SIL Open Font / Apache 2.0).</p>
+</LegalPage>

@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import Btn from '../components/Btn.astro';
+---
+<Base title="Pas de signal">
+  <section class="relative flex min-h-[70vh] items-center justify-center overflow-hidden bg-[#111]">
+    <canvas data-noise-auto width="240" height="135" class="absolute inset-0 size-full opacity-60 [image-rendering:pixelated]" aria-hidden="true"></canvas>
+    <div class="relative flex flex-col items-center gap-6 px-4 py-20 text-center">
+      <span class="font-vt text-[84px] leading-[.8] text-ch-green [text-shadow:3px_3px_0_#000,-3px_0_#2EE6D6,3px_0_#FF2E88] sm:text-[120px]">CH 404</span>
+      <h1 class="m-0 bg-ink px-5 py-2 font-vt text-[34px] text-cream chroma-2 sm:text-[48px]">PAS DE SIGNAL</h1>
+      <p class="m-0 max-w-[460px] bg-ink/80 px-4 py-2">Cette chaîne n'existe pas (ou plus). Reviens sur une chaîne qui diffuse.</p>
+      <Btn href="/" variant="night" prefix="CH 01">Retour à l'accueil</Btn>
+    </div>
+  </section>
+</Base>

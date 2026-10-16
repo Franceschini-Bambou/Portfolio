@@ -1,0 +1,17 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+import { getContent } from '../lib/data';
+const { site } = await getContent();
+---
+<LegalPage title="Politique de confidentialité" file="confidentialite.txt">
+  <h2>Données collectées</h2>
+  <p>Le seul endroit où ce site collecte des données est le formulaire de contact : nom, prénom, adresse e-mail et message.</p>
+  <h2>À quoi elles servent</h2>
+  <p>Uniquement à te répondre. Elles ne sont ni revendues, ni transmises, ni utilisées à des fins publicitaires.</p>
+  <h2>Où elles sont stockées</h2>
+  <p>Dans la base de données PocketBase du site, accessible uniquement par moi. Les messages sont supprimés au plus tard 12 mois après notre dernier échange.</p>
+  <h2>Cookies et mesure d'audience</h2>
+  <p>Ce site ne dépose aucun cookie et n'utilise aucun outil de suivi ou de mesure d'audience. Les polices sont hébergées sur le site lui-même (aucun appel à des services tiers).</p>
+  <h2>Tes droits</h2>
+  <p>Conformément au RGPD, tu peux demander à consulter, corriger ou supprimer tes données en m'écrivant à <a href={`mailto:${site.email}`}>{site.email}</a>. Tu peux aussi adresser une réclamation à la CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>).</p>
+</LegalPage>
