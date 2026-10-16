@@ -7,8 +7,9 @@ import Window from '../../components/Window.astro';
 import Btn from '../../components/Btn.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import Img from '../../components/Img.astro';
+import Lightbox from '../../components/Lightbox.astro';
 import { getContent, neighbours, type Project } from '../../lib/data';
-import { mediaUrl } from '../../lib/media';
+import { mediaUrl, fullUrl } from '../../lib/media';
 
 export async function getStaticPaths() {
   const { projects } = await getContent();
@@ -21,6 +22,11 @@ const { prev, next } = neighbours(projects, pj.slug);
 const heroUrl = await mediaUrl(pj.hero, 1200);
 const posterUrl = await mediaUrl(pj.videoPoster ?? pj.hero, 1600);
 const pad = (n: number) => String(n).padStart(2, '0');
+// versions nettes (taille d'origine) pour la loupe
+const galleryFull = await Promise.all(pj.gallery.map((g) => fullUrl(g.src)));
+const heroFull = await fullUrl(pj.hero);
+const posterFull = await fullUrl(pj.videoPoster ?? pj.hero);
+const zoomBadge = 'pointer-events-none absolute right-2 bottom-2 z-10 bg-ink px-2 pt-1 pb-0.5 font-vt text-[20px] leading-none text-cream transition-opacity [@media(hover:hover)]:opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100';
 const steps = pj.steps.map((text, i) => ({ text, n: pad(i + 1), file: `etape_${pad(i + 1)}.txt` }));
 const hasGallery = pj.gallery.length > 0;
 const hasVideo = !!pj.video || !!pj.videoPoster;
@@ -30,6 +36,7 @@ const links = [
 ];
 ---
 <Base title={pj.title} label={`Projet — ${pj.title}`} description={pj.description}>
+  <Lightbox />
   <!-- HÉROS -->
   <section class="relative overflow-hidden bg-ink">
     <HeroBackdrop opacity={0.13} bands={[{ top: '44%', h: 16, delay: '3s' }]} />
@@ -70,7 +77,11 @@ const links = [
             <div data-screen class="relative m-3 flex h-[clamp(380px,110vw,520px)] justify-center overflow-hidden border-[3px] border-ink bg-ink sm:m-3.5 lg:h-[520px]">
               {pj.gallery.map((g, i) => (
                 <div data-slide hidden={i !== 0} class="h-full">
-                  <Img src={g.src} alt={g.title} width={1000} loading={i === 0 ? 'eager' : 'lazy'} class="block h-full w-auto object-contain" />
+                  <button type="button" data-zoom data-zoom-group="affiches" data-type="image" data-full={galleryFull[i]} data-caption={`AFF ${g.num} — ${g.title}`}
+                    class="group relative block h-full cursor-zoom-in" aria-label={`Agrandir l'affiche ${g.title}`}>
+                    <Img src={g.src} alt={g.title} width={1000} loading={i === 0 ? 'eager' : 'lazy'} class="block h-full w-auto object-contain" />
+                    <span class={zoomBadge} aria-hidden="true">⤢ AGRANDIR</span>
+                  </button>
                 </div>
               ))}
               <div class="scanlines pointer-events-none absolute inset-0 [--scan:.2]" aria-hidden="true"></div>
@@ -92,6 +103,10 @@ const links = [
               <div class="scanlines pointer-events-none absolute inset-0 [--scan:.25]" aria-hidden="true"></div>
               <span class="absolute top-3.5 left-4 font-vt text-[30px] text-cream [text-shadow:2px_2px_0_#000]" aria-hidden="true">▶ PLAY</span>
               <span class="absolute right-4 bottom-3 font-vt text-[30px] text-cream [text-shadow:2px_2px_0_#000]" data-tc aria-hidden="true">SP 00:00:26</span>
+              <button type="button" data-zoom data-type="image" data-full={heroFull} data-caption={`Capture — ${pj.title}`}
+                class="group absolute inset-0 z-10 cursor-zoom-in" aria-label="Agrandir la capture">
+                <span class={zoomBadge.replace('right-2 bottom-2', 'right-3 top-3')} aria-hidden="true">⤢ AGRANDIR</span>
+              </button>
             </div>
           </Window>
         ) : null}
@@ -154,24 +169,17 @@ const links = [
           </div>
           <span class="font-vt text-vt-lg text-rose" data-tc aria-hidden="true">SP 00:00:26</span>
         </div>
-        <div class="relative aspect-video overflow-hidden border-[3px] border-cream bg-black shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]" data-video>
-          {pj.video ? (
-            <video class="absolute inset-0 size-full object-cover" src={pj.video} poster={posterUrl} preload="none" playsinline>
-              Ton navigateur ne lit pas cette vidéo.
-            </video>
-          ) : (
-            posterUrl && <img src={posterUrl} alt={`Vidéo ${pj.title}`} class="absolute inset-0 size-full object-cover" loading="lazy" />
-          )}
-          <div data-video-overlay class="absolute inset-0">
-            <div class="scanlines pointer-events-none absolute inset-0 [--scan:.25]" aria-hidden="true"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <button type="button" data-video-play disabled={!pj.video}
-                class="btn-retro border-[3px] border-cream bg-bordeaux px-6 py-3 font-vt text-[40px] font-normal leading-none text-cream [--sh:#000] [--sh-x:6px] [--sh-y:6px] disabled:cursor-default sm:px-[34px] sm:py-[18px] sm:text-[56px] sm:[--sh-x:8px] sm:[--sh-y:8px]"
-                aria-label={`Lire la vidéo ${pj.title}`}>▶ PLAY</button>
-            </div>
-            <span class="absolute top-3 left-4 font-vt text-[20px] [text-shadow:2px_2px_0_#000] sm:top-[18px] sm:left-[22px] sm:text-[30px]" aria-hidden="true">CANAL BF · {pj.title.toUpperCase()}</span>
-            {!pj.video && <span class="absolute bottom-3 left-4 bg-ink px-2.5 py-1 font-vt text-[20px] text-rose sm:bottom-[18px] sm:left-[22px] sm:text-[24px]">VIDÉO À INTÉGRER</span>}
-          </div>
+        <div class="relative aspect-video overflow-hidden border-[3px] border-cream bg-black shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]">
+          {posterUrl && <img src={posterUrl} alt="" class="absolute inset-0 size-full object-cover" loading="lazy" />}
+          <div class="scanlines pointer-events-none absolute inset-0 [--scan:.25]" aria-hidden="true"></div>
+          <span class="pointer-events-none absolute top-3 left-4 font-vt text-[20px] [text-shadow:2px_2px_0_#000] sm:top-[18px] sm:left-[22px] sm:text-[30px]" aria-hidden="true">CANAL BF · {pj.title.toUpperCase()}</span>
+          {!pj.video && <span class="pointer-events-none absolute bottom-3 left-4 bg-ink px-2.5 py-1 font-vt text-[20px] text-rose sm:bottom-[18px] sm:left-[22px] sm:text-[24px]">VIDÉO À INTÉGRER</span>}
+          <!-- Tout l'écran est cliquable : la vidéo (ou, en attendant, l'image) s'ouvre en grand -->
+          <button type="button" data-zoom data-type={pj.video ? 'video' : 'image'} data-full={pj.video ?? posterFull} data-poster={posterFull}
+            data-caption={pj.title} class="group absolute inset-0 flex cursor-pointer items-center justify-center"
+            aria-label={pj.video ? `Lire la vidéo ${pj.title} en grand` : `Agrandir l'image de ${pj.title}`}>
+            <span class="btn-retro border-[3px] border-cream bg-bordeaux px-6 py-3 font-vt text-[40px] font-normal leading-none text-cream [--sh:#000] [--sh-x:6px] [--sh-y:6px] group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 sm:px-[34px] sm:py-[18px] sm:text-[56px] sm:[--sh-x:8px] sm:[--sh-y:8px]">{pj.video ? '▶ PLAY' : '⤢ VOIR'}</span>
+          </button>
         </div>
       </div>
     </section>
@@ -190,9 +198,12 @@ const links = [
           {pj.gallery.map((a) => (
             <li class="w-[78vw] max-w-[380px] shrink-0 snap-start md:w-auto md:max-w-none">
               <figure class="m-0 flex flex-col gap-4">
-                <div class="relative border-[3px] border-cream bg-black shadow-[10px_10px_0_var(--color-bordeaux)] transition-shadow hover:shadow-[-6px_0_0_var(--color-cyan),6px_0_0_var(--color-magenta)]">
+                <button type="button" data-zoom data-zoom-group="affiches" data-type="image" data-full={galleryFull[pj.gallery.indexOf(a)]} data-caption={`AFF ${a.num} — ${a.title}`}
+                  class="group relative block w-full cursor-zoom-in border-[3px] border-cream bg-black text-left shadow-[10px_10px_0_var(--color-bordeaux)] transition-shadow hover:shadow-[-6px_0_0_var(--color-cyan),6px_0_0_var(--color-magenta)]"
+                  aria-label={`Agrandir l'affiche ${a.title}`}>
                   <Img src={a.src} alt={a.title} width={900} class="block h-auto w-full" />
-                </div>
+                  <span class={zoomBadge} aria-hidden="true">⤢ AGRANDIR</span>
+                </button>
                 <figcaption class="flex items-baseline gap-3"><span class="font-vt text-[26px] text-rose">AFF {a.num}</span><span class="font-display text-[20px] leading-[1.15] sm:text-[22px]">{a.title}</span></figcaption>
               </figure>
             </li>

@@ -9,8 +9,7 @@
   "dev": "astro dev",
   "build": "astro build",
   "preview": "astro preview",
-  "astro": "astro",
-  "seed": "node scripts/seed.mjs"
+  "astro": "astro"
   },
   
   "dependencies": {

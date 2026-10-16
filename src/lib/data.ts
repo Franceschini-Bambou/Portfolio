@@ -1,14 +1,13 @@
 // ==========================================================
 // ACCÈS AUX DONNÉES
-// Au moment du build, Astro lit tes contenus dans PocketBase.
-// Si PocketBase ne répond pas (ou si PUBLIC_PB_URL est vide),
-// on utilise le contenu de secours de src/data/content.mjs.
+// Tout le contenu du site (textes, images, vidéo, CV) vient de
+// PocketBase. Si PocketBase ne répond pas, le site affiche une
+// erreur claire au lieu de se construire à moitié vide.
 // ==========================================================
 import PocketBase from 'pocketbase';
 import type { ImageMetadata } from 'astro';
-import * as fallback from '../data/content.mjs';
 
-/** Une image : soit un fichier local importé, soit une URL PocketBase */
+/** Une image : l'adresse du fichier dans PocketBase */
 export type Media = ImageMetadata | string;
 
 export interface Project {
@@ -35,7 +34,7 @@ export interface Project {
   hasPage: boolean;
 }
 export interface Skill { title: string; description: string }
-export interface Inspiration { name: string; photos: Media[] }
+export interface Inspiration { name: string; photos: Media[]; /** cadrage de chaque photo (object-position CSS) */ positions: string[] }
 export interface Tool { name: string; fileLabel: string; color: string; items: string[] }
 export interface Site {
   stage: string;
@@ -46,43 +45,9 @@ export interface Site {
   portrait?: Media;
   cv?: string;
 }
-export interface Content { site: Site; projects: Project[]; skills: Skill[]; inspirations: Inspiration[]; tools: Tool[]; source: 'pocketbase' | 'local' }
+export interface Content { site: Site; projects: Project[]; skills: Skill[]; inspirations: Inspiration[]; tools: Tool[]; source: 'pocketbase' }
 
-// --- Images locales (mode secours) ---
-const localFiles = import.meta.glob<{ default: ImageMetadata }>('../assets/images/*.{png,jpg,jpeg,webp}', { eager: true });
-const local = (name?: string | null): Media | undefined => {
-  if (!name) return undefined;
-  const hit = localFiles[`../assets/images/${name}`];
-  if (!hit) console.warn(`[canal-bf] image locale introuvable : ${name}`);
-  return hit?.default;
-};
 const pad = (n: number) => String(n).padStart(2, '0');
-
-function fromLocal(): Content {
-  const f = fallback as any;
-  return {
-    source: 'local',
-    site: {
-      stage: f.site.stage, email: f.site.email,
-      linkedin: f.site.linkedin, linkedinLabel: f.site.linkedin_label,
-      instagram: f.site.instagram, instagramLabel: f.site.instagram_label,
-      behance: f.site.behance, behanceLabel: f.site.behance_label,
-      portrait: local(f.site.portrait),
-      cv: f.site.cv ?? undefined,
-    },
-    projects: f.projects.map((p: any, i: number) => ({
-      id: p.slug, slug: p.slug, title: p.title, genre: p.genre, year: p.year, time: p.time, channel: p.channel,
-      color: p.color, description: p.description, tags: p.tags,
-      thumbnails: p.thumbnails.map(local).filter(Boolean),
-      hero: local(p.hero), video: p.video ?? undefined, videoPoster: local(p.video_poster),
-      gallery: p.gallery.map((g: string, j: number) => ({ src: local(g)!, title: p.gallery_titles[j] ?? '', num: pad(j + 1) })),
-      context: p.context, problem: p.problem, steps: p.steps, result: p.result, role: p.role, hasPage: p.has_page,
-    })),
-    skills: f.skills.map((s: any) => ({ title: s.title, description: s.description })),
-    inspirations: f.inspirations.map((s: any) => ({ name: s.name, photos: s.photos.map(local).filter(Boolean) })),
-    tools: f.tools.map((t: any) => ({ name: t.name, fileLabel: t.file_label, color: t.color, items: t.items })),
-  };
-}
 
 async function fromPocketBase(url: string): Promise<Content> {
   const pb = new PocketBase(url);
@@ -99,11 +64,11 @@ async function fromPocketBase(url: string): Promise<Content> {
   return {
     source: 'pocketbase',
     site: {
-      stage: s.stage || (fallback as any).site.stage,
+      stage: s.stage ?? '',
       email: s.email, linkedin: s.linkedin, linkedinLabel: s.linkedin_label,
       instagram: s.instagram, instagramLabel: s.instagram_label,
       behance: s.behance, behanceLabel: s.behance_label,
-      portrait: file(s, s.portrait) ?? local((fallback as any).site.portrait),
+      portrait: file(s, s.portrait),
       cv: s.cv ? file(s, s.cv) : undefined,
     },
     projects: projects.map((p: any) => ({
@@ -116,7 +81,7 @@ async function fromPocketBase(url: string): Promise<Content> {
       hasPage: !!p.has_page,
     })),
     skills: skills.map((k: any) => ({ title: k.title, description: k.description })),
-    inspirations: inspirations.map((r: any) => ({ name: r.name, photos: (r.photos ?? []).map((n: string) => file(r, n)) })),
+    inspirations: inspirations.map((r: any) => ({ name: r.name, photos: (r.photos ?? []).map((n: string) => file(r, n)), positions: Array.isArray(r.positions) ? r.positions : [] })),
     tools: tools.map((t: any) => ({ name: t.name, fileLabel: t.file_label, color: t.color, items: t.items ?? [] })),
   };
 }
@@ -125,7 +90,9 @@ let cache: Promise<Content> | undefined;
 
 /** Renvoie tout le contenu du site (mis en cache pendant le build). */
 export function getContent(): Promise<Content> {
-  if (cache) return cache;
+  // en production (build) on lit PocketBase une seule fois ; en dev on relit à chaque page,
+  // pour voir tout de suite ce que tu modifies dans l'admin
+  if (cache && import.meta.env.PROD) return cache;
   const url = import.meta.env.PUBLIC_PB_URL as string | undefined;
   cache = (async () => typo(await load(url)))();
   return cache;
@@ -139,20 +106,22 @@ function typo(c: Content): Content {
 }
 
 async function load(url: string | undefined): Promise<Content> {
-  {
-    if (!url) {
-      console.info('[canal-bf] PUBLIC_PB_URL vide → contenu local utilisé.');
-      return fromLocal();
-    }
-    try {
-      const data = await fromPocketBase(url);
-      if (!data.projects.length) throw new Error('aucun projet publié');
-      console.info(`[canal-bf] contenu chargé depuis PocketBase (${url}).`);
-      return data;
-    } catch (err) {
-      console.warn(`[canal-bf] PocketBase injoignable (${(err as Error).message}) → contenu local utilisé.`);
-      return fromLocal();
-    }
+  if (!url) {
+    throw new Error(
+      '[canal-bf] PUBLIC_PB_URL est vide : indique l\'adresse de PocketBase dans le fichier .env ' +
+      '(ex. PUBLIC_PB_URL=http://127.0.0.1:8090).',
+    );
+  }
+  try {
+    const data = await fromPocketBase(url);
+    console.info(`[canal-bf] contenu chargé depuis PocketBase (${url}).`);
+    return data;
+  } catch (err) {
+    throw new Error(
+      `[canal-bf] Impossible de lire PocketBase à l'adresse ${url}. ` +
+      'Vérifie qu\'il est bien lancé (.\\pocketbase.exe serve) puis recharge la page. ' +
+      `Détail : ${(err as Error).message}`,
+    );
   }
 }
 

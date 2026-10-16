@@ -100,6 +100,9 @@
 }
 
 @layer base {
+  /* la page ne défile plus derrière la loupe */
+  html:has(dialog[data-lightbox][open]) { overflow: hidden; }
+
   html {
     background: var(--color-ink);
     -webkit-font-smoothing: antialiased;

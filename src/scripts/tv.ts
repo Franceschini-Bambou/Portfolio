@@ -197,16 +197,85 @@ document.addEventListener('keydown', (e) => {
   goTo(root, Number(root.dataset.index || 0) + (e.key === 'ArrowRight' ? 1 : -1));
 });
 
-/* ---------- 7. Lecteur vidéo ---------- */
+/* ---------- 7. Loupe : affiches, captures et vidéo en grand ---------- */
+// Les éléments cliquables ont l'attribut data-zoom (voir Lightbox.astro).
+let lbItems: HTMLElement[] = [];
+let lbIndex = 0;
+const lightbox = () => document.querySelector<HTMLDialogElement>('dialog[data-lightbox]');
+
+function lbShow(i: number) {
+  const dlg = lightbox();
+  if (!dlg || !lbItems.length) return;
+  lbIndex = (i + lbItems.length) % lbItems.length;
+  const item = lbItems[lbIndex];
+  const img = dlg.querySelector<HTMLImageElement>('[data-lb-img]')!;
+  const video = dlg.querySelector<HTMLVideoElement>('[data-lb-video]')!;
+  const isVideo = item.dataset.type === 'video';
+  video.pause();
+  img.hidden = isVideo;
+  video.hidden = !isVideo;
+  if (isVideo) {
+    img.removeAttribute('src');
+    video.poster = item.dataset.poster || '';
+    video.src = item.dataset.full!;
+    video.play().catch(() => {}); // si le navigateur bloque la lecture auto, les contrôles restent là
+  } else {
+    video.removeAttribute('src');
+    video.load();
+    img.src = item.dataset.full!;
+    img.alt = item.dataset.caption || '';
+  }
+  dlg.querySelector('[data-lb-caption]')!.textContent = item.dataset.caption || '';
+  const several = lbItems.length > 1;
+  dlg.querySelector('[data-lb-counter]')!.textContent = several ? `${pad2(lbIndex + 1)} / ${pad2(lbItems.length)}` : isVideo ? 'LECTURE' : 'ZOOM';
+  dlg.querySelectorAll<HTMLElement>('[data-lb-prev],[data-lb-next]').forEach((b) => (b.style.visibility = several ? 'visible' : 'hidden'));
+}
+function lbOpen(trigger: HTMLElement) {
+  const dlg = lightbox();
+  if (!dlg || !trigger.dataset.full) return;
+  const group = trigger.dataset.zoomGroup;
+  // une seule entrée par image (une même affiche peut être à 2 endroits de la page)
+  const all = group ? [...document.querySelectorAll<HTMLElement>(`[data-zoom][data-zoom-group="${group}"]`)] : [trigger];
+  lbItems = all.filter((el, i) => all.findIndex((o) => o.dataset.full === el.dataset.full) === i);
+  lbShow(Math.max(0, lbItems.findIndex((el) => el.dataset.full === trigger.dataset.full)));
+  dlg.showModal();
+}
+function lbClose() { lightbox()?.close(); }
+
 document.addEventListener('click', (e) => {
-  const btn = (e.target as Element).closest<HTMLElement>('[data-video-play]');
-  if (!btn) return;
-  const video = btn.closest('[data-video]')?.querySelector('video');
-  if (!video) return;
-  btn.closest<HTMLElement>('[data-video-overlay]')!.hidden = true;
-  video.controls = true;
-  video.play();
+  const t = e.target as Element;
+  const trigger = t.closest<HTMLElement>('[data-zoom]');
+  if (trigger) return lbOpen(trigger);
+  if (!t.closest('dialog[data-lightbox]')) return;
+  if (t.closest('[data-lb-close]')) lbClose();
+  else if (t.closest('[data-lb-prev]')) lbShow(lbIndex - 1);
+  else if (t.closest('[data-lb-next]')) lbShow(lbIndex + 1);
+  else if (t.matches('[data-lb-stage]')) lbClose(); // clic à côté de l'image
 });
+document.addEventListener('keydown', (e) => {
+  const dlg = lightbox();
+  if (!dlg?.open) return;
+  if (e.key === 'ArrowRight') lbShow(lbIndex + 1);
+  if (e.key === 'ArrowLeft') lbShow(lbIndex - 1);
+});
+// quand la loupe se ferme (bouton, Échap…), on coupe la vidéo
+document.addEventListener('close', (e) => {
+  const dlg = e.target as HTMLElement;
+  if (!dlg.matches?.('dialog[data-lightbox]')) return;
+  const video = dlg.querySelector<HTMLVideoElement>('[data-lb-video]');
+  if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
+}, true);
+// swipe dans la loupe sur mobile
+let lbTouchX = 0;
+document.addEventListener('touchstart', (e) => {
+  if ((e.target as Element).closest('dialog[data-lightbox] [data-lb-stage]')) lbTouchX = e.touches[0].clientX;
+}, { passive: true });
+document.addEventListener('touchend', (e) => {
+  if (!(e.target as Element).closest('dialog[data-lightbox] [data-lb-stage]') || lbItems.length < 2) return;
+  const dx = e.changedTouches[0].clientX - lbTouchX;
+  if (Math.abs(dx) > 45) lbShow(lbIndex + (dx < 0 ? 1 : -1));
+}, { passive: true });
+document.addEventListener('astro:before-swap', lbClose);
 
 /* ---------- 8. Formulaire de contact → PocketBase ---------- */
 document.addEventListener('submit', async (e) => {

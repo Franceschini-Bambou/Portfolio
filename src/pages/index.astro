@@ -12,8 +12,10 @@ import Img from '../components/Img.astro';
 import { getContent } from '../lib/data';
 import { mediaUrl } from '../lib/media';
 
-const { site, projects } = await getContent();
-const portrait = site.portrait!;
+const { site, projects: allProjects } = await getContent();
+// L'accueil n'affiche que les 3 premiers projets (ordre du champ « sort » dans PocketBase)
+const projects = allProjects.slice(0, 3);
+const portrait = site.portrait;
 const portraitUrl = await mediaUrl(portrait, 900);
 ---
 <Base title="Accueil" label="CH 01 Accueil">
@@ -98,7 +100,7 @@ const portraitUrl = await mediaUrl(portrait, 900);
 
       <Window title="portrait.jpg" bg="var(--color-rose)" class="rotate-[1.2deg] shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]">
         <div class="relative m-3 h-[clamp(300px,80vw,470px)] overflow-hidden border-[3px] border-ink bg-ink sm:m-3.5 lg:h-[470px]">
-          <Img src={portrait} alt="Portrait de Bambou Franceschini" width={1000} loading="lazy" class="absolute inset-0 size-full object-cover contrast-[1.1] grayscale" />
+          {portrait && <Img src={portrait} alt="Portrait de Bambou Franceschini" width={1000} loading="lazy" class="absolute inset-0 size-full object-cover contrast-[1.1] grayscale" />}
           <div class="absolute inset-x-0 top-[25%] h-4 animate-[band_2.8s_steps(1)_infinite] bg-cover bg-center opacity-70 mix-blend-screen grayscale" style={`background-image:url(${portraitUrl})`} aria-hidden="true"></div>
           <div class="absolute inset-x-0 top-[70%] h-1.5 animate-[band_3.6s_steps(1)_infinite] bg-cyan opacity-60 mix-blend-multiply" aria-hidden="true"></div>
           <div class="scanlines pointer-events-none absolute inset-0" aria-hidden="true"></div>

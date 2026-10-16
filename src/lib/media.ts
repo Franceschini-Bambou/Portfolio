@@ -11,3 +11,16 @@ export async function mediaUrl(src: Media | undefined, width = 1400): Promise<st
       : await getImage({ src, width: Math.min(width, src.width), format: 'webp', quality: 82 });
   return img.src;
 }
+
+/**
+ * Version « plein écran » d'une image pour la loupe : on garde sa taille
+ * d'origine (aucune réduction) et une qualité maximale, pour qu'elle soit nette.
+ */
+export async function fullUrl(src: Media | undefined): Promise<string | undefined> {
+  if (!src) return undefined;
+  const img =
+    typeof src === 'string'
+      ? await getImage({ src, inferSize: true, format: 'webp', quality: 95 })
+      : await getImage({ src, width: src.width, format: 'webp', quality: 95 });
+  return img.src;
+}
