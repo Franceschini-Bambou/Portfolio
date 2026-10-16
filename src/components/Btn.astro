@@ -1,0 +1,35 @@
+---
+// Bouton rétro à ombre franche (lien si href, sinon <button>).
+// prefix = petit texte VT323 devant le libellé (« ▶ », « CH 02 », « ● REC »…)
+interface Props {
+  href?: string;
+  variant?: 'bordeaux' | 'cream' | 'ink' | 'rose' | 'night' | 'pill' | 'outline';
+  prefix?: string;
+  class?: string;
+  type?: 'button' | 'submit';
+  [key: string]: any;
+}
+const { href, variant = 'bordeaux', prefix, class: className = '', type = 'button', ...rest } = Astro.props;
+
+const variants: Record<string, string> = {
+  bordeaux: 'border-[3px] border-ink bg-bordeaux text-cream [--sh:var(--color-ink)]',
+  cream: 'border-[3px] border-ink bg-cream text-ink [--sh:var(--color-ink)] [--sh-hover:var(--color-bordeaux)]',
+  ink: 'border-[3px] border-ink bg-ink text-cream [--sh:var(--color-bordeaux)]',
+  rose: 'border-[3px] border-ink bg-rose text-ink [--sh:var(--color-ink)] [--sh-hover:var(--color-bordeaux)]',
+  night: 'border-2 border-cream bg-bordeaux text-cream [--sh:#000]',
+  pill: 'rounded-full border-2 border-cream bg-bordeaux text-cream [--sh:#000] [--sh-x:4px] [--sh-y:4px] text-[18px]!',
+  outline: 'border-2 border-cream bg-transparent text-cream [--sh-x:0px] [--sh-y:0px] hover:bg-cream hover:text-ink text-[17px] sm:text-[18px]!',
+};
+const cls = ['btn-retro px-[18px] py-2.5 text-[17px] sm:px-[22px] sm:py-3 sm:text-[20px]', variants[variant], className];
+---
+{href ? (
+  <a href={href} class:list={cls} {...rest}>
+    {prefix && <span class="vt" aria-hidden="true">{prefix}</span>}
+    <slot />
+  </a>
+) : (
+  <button type={type} class:list={cls} {...rest}>
+    {prefix && <span class="vt" aria-hidden="true">{prefix}</span>}
+    <slot />
+  </button>
+)}

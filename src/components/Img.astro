@@ -1,0 +1,23 @@
+---
+// Affiche une image optimisée (WebP), qu'elle vienne de PocketBase
+// (URL) ou du dossier src/assets/images (fichier local).
+import { Image } from 'astro:assets';
+import type { Media } from '../lib/data';
+
+interface Props {
+  src: Media;
+  alt?: string;
+  class?: string;
+  style?: string;
+  /** largeur maximale générée (px) */
+  width?: number;
+  loading?: 'lazy' | 'eager';
+}
+const { src, alt = '', class: className, style, width = 1400, loading = 'lazy' } = Astro.props;
+const remote = typeof src === 'string';
+---
+{remote ? (
+  <Image src={src as string} alt={alt} inferSize width={width} format="webp" quality={82} loading={loading} decoding="async" class={className} style={style} />
+) : (
+  <Image src={src as ImageMetadata} alt={alt} width={Math.min(width, (src as ImageMetadata).width)} format="webp" quality={82} loading={loading} decoding="async" class={className} style={style} />
+)}

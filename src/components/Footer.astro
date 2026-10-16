@@ -1,0 +1,43 @@
+---
+// Pied de page : mire de couleurs + « Fin de transmission »
+import Btn from './Btn.astro';
+import { channels, pad2 } from '../lib/channels';
+import { getContent } from '../lib/data';
+const { site } = await getContent();
+const bars = ['#D9D4CC', '#E2B84A', '#2EE6D6', '#8CBF6F', '#FF2E88', '#6F080C', '#4F86A6'];
+const sub = ['#4F86A6', '#1D0B0C', '#FF2E88', '#1D0B0C', '#2EE6D6', '#1D0B0C', '#D9D4CC'];
+---
+<footer class="bg-ink text-cream">
+  <div class="grid h-[clamp(56px,10.4vw,150px)] grid-cols-7" aria-hidden="true">
+    {bars.map((c) => <span style={`background:${c}`}></span>)}
+  </div>
+  <div class="grid h-[clamp(10px,1.8vw,26px)] grid-cols-7" aria-hidden="true">
+    {sub.map((c) => <span style={`background:${c}`}></span>)}
+  </div>
+
+  <div class="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 pt-14 pb-24 sm:px-6 lg:gap-12 lg:px-14 lg:pt-[72px] lg:pb-10">
+    <div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between md:gap-10">
+      <p class="m-0 font-display text-h2-sm leading-[.9] text-cream chroma-3 lg:chroma-5">Fin de<br />transmission</p>
+      <div class="flex max-w-[440px] flex-col items-start gap-[18px] md:items-end md:text-right">
+        <img src="/logo-bf.svg" alt="Logo Bambou Franceschini" width="256" height="96" loading="lazy" class="block h-[72px] w-auto lg:h-24" style="filter:drop-shadow(-3px 0 0 rgba(46,230,214,.7)) drop-shadow(3px 0 0 rgba(255,46,136,.7))" />
+        <p class="m-0 leading-normal">Designer graphique &amp; audiovisuel — en recherche de stage {site.stage}.</p>
+        <Btn href="/contact/" variant="night" prefix="▶">Me contacter</Btn>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-6 border-t-2 border-bordeaux pt-6 text-[17px] xl:flex-row xl:items-center xl:justify-between lg:text-[18px]">
+      <nav aria-label="Plan du site">
+        <ul class="m-0 grid list-none grid-cols-2 gap-x-7 gap-y-3 p-0 sm:flex" role="list">
+          {channels.map((c) => (
+            <li><a href={c.href} class="flex items-baseline gap-2 whitespace-nowrap no-underline hover:text-rose"><span class="font-vt text-[22px] text-rose">{pad2(c.n)}</span>{c.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+      <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-7">
+        <a href="/mentions-legales/" class="underline hover:text-rose">Mentions légales</a>
+        <a href="/politique-de-confidentialite/" class="underline hover:text-rose">Politique de confidentialité</a>
+        <span class="text-rose">© 2026 Bambou Franceschini. Tous droits réservés.</span>
+      </div>
+    </div>
+  </div>
+</footer>

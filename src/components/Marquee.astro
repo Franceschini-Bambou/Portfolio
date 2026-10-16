@@ -1,0 +1,14 @@
+---
+// Bande défilante des logiciels (la liste est doublée pour boucler sans saut)
+import { marquee } from '../data/content.mjs';
+const items = [...marquee, ...marquee];
+---
+<div class="overflow-hidden border-y-[3px] border-ink bg-bordeaux py-2.5 sm:py-3.5" aria-label="Logiciels utilisés">
+  <ul class="m-0 flex w-max animate-marquee list-none p-0 hover:[animation-play-state:paused]" role="list">
+    {items.map((m, i) => (
+      <li class="flex items-center gap-5 pr-5 font-vt text-[28px] leading-none whitespace-nowrap text-cream sm:gap-7 sm:pr-7 sm:text-[40px]" aria-hidden={i >= marquee.length ? 'true' : undefined}>
+        {m}<span class="text-[20px] text-rose sm:text-[28px]" aria-hidden="true">■</span>
+      </li>
+    ))}
+  </ul>
+</div>

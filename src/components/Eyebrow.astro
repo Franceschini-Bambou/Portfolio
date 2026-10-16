@@ -1,0 +1,6 @@
+---
+// Petit sur-titre VT323 : « (01) — Présentation »
+interface Props { class?: string; as?: string }
+const { class: className = 'text-bordeaux', as: Tag = 'p' } = Astro.props;
+---
+<Tag class:list={['m-0 font-vt text-vt-lg leading-tight', className]}><slot /></Tag>

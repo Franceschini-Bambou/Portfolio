@@ -1,0 +1,7 @@
+---
+// Grand numéro de chaîne en « phosphore vert » : CH 01, CH 02…
+interface Props { n: string | number; class?: string; color?: string }
+const { n, class: className = '', color = 'text-ch-green glow-green' } = Astro.props;
+const label = typeof n === 'number' ? `CH ${String(n).padStart(2, '0')}` : n;
+---
+<span class:list={['block font-vt text-channel leading-[.8] whitespace-nowrap', color, className]} aria-label={`Chaîne ${label.replace('CH ', '')}`}>{label}</span>

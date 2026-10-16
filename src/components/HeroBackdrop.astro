@@ -1,0 +1,15 @@
+---
+// Fond des héros sombres : marbre brouillé + bandes de signal qui sautent.
+interface Props { bands?: { top: string; h: number; delay?: string; reverse?: boolean; pos?: string }[]; opacity?: number; glow?: boolean }
+const { bands = [], opacity = 0.16, glow = false } = Astro.props;
+---
+<div class="pointer-events-none absolute inset-0" aria-hidden="true">
+  <div class="bg-marble absolute inset-0 contrast-[1.4]" style={`opacity:${opacity}`}></div>
+  {bands.map((b) => (
+    <div
+      class="bg-marble absolute inset-x-0 animate-band"
+      style={`top:${b.top};height:${b.h}px;opacity:.35;${b.pos ? `background-position:${b.pos};` : ''}${b.delay ? `animation-duration:${b.delay};` : ''}${b.reverse ? 'animation-direction:reverse;' : ''}`}
+    ></div>
+  ))}
+  {glow && <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(111,8,12,.35),transparent_65%)]"></div>}
+</div>

@@ -1,0 +1,60 @@
+---
+// Guide TV des projets (accueil + page Mes projets).
+// Desktop/tablette : tableau HORAIRE | À L'ÉCRAN | ÉMISSION.
+// Mobile : une fiche par émission, empilées.
+import Img from './Img.astro';
+import type { Project } from '../lib/data';
+interface Props { projects: Project[]; filterable?: boolean }
+const { projects, filterable = false } = Astro.props;
+---
+<div class="border-[3px] border-ink bg-cream text-ink shadow-[8px_8px_0_var(--color-ink)] md:shadow-[12px_12px_0_var(--color-ink)]" data-guide>
+  <div class="hidden bg-ink font-vt text-[24px] leading-none text-cream md:grid md:grid-cols-[110px_minmax(0,.85fr)_minmax(0,1fr)] lg:grid-cols-[130px_minmax(0,.9fr)_minmax(0,1fr)] xl:grid-cols-[150px_460px_minmax(0,1fr)]" aria-hidden="true">
+    <span class="px-4 py-3 lg:px-5">HORAIRE</span>
+    <span class="border-l-[3px] border-cream px-4 py-3 lg:px-5">À L'ÉCRAN</span>
+    <span class="border-l-[3px] border-cream px-4 py-3 lg:px-5">ÉMISSION</span>
+  </div>
+
+  <ul class="m-0 list-none p-0" role="list">
+    {projects.map((p, i) => {
+      const Tag = p.hasPage ? 'a' : 'div';
+      const watch = p.hasPage ? '▶ REGARDER' : '▶ BIENTÔT';
+      return (
+        <li class:list={['border-ink', i === 0 ? 'md:border-t-[3px]' : 'border-t-[3px]']} data-genre={filterable ? p.genre : undefined}>
+          <Tag
+            href={p.hasPage ? `/projets/${p.slug}/` : undefined}
+            class:list={['group grid grid-cols-1 bg-cream text-ink no-underline transition-colors md:grid-cols-[110px_minmax(0,.85fr)_minmax(0,1fr)] lg:grid-cols-[130px_minmax(0,.9fr)_minmax(0,1fr)] xl:grid-cols-[150px_460px_minmax(0,1fr)]', p.hasPage ? 'cursor-pointer hover:bg-white' : 'cursor-default']}
+            aria-label={p.hasPage ? `${p.title} — voir le projet` : undefined}
+          >
+            <div class="flex items-center gap-3 px-4 pt-4 md:flex-col md:items-start md:gap-2.5 md:py-6 lg:px-5">
+              <span class="font-vt text-[40px] leading-[.9] md:text-[42px] lg:text-[48px]">{p.time}</span>
+              <span class="border-2 border-ink px-2 py-1 font-vt text-[22px] leading-none text-ink" style={`background:${p.color}`}>{p.channel}</span>
+              <span class="ml-auto font-vt text-[20px] text-bordeaux md:hidden" aria-hidden="true">{watch}</span>
+            </div>
+
+            <div class="px-4 pt-3 md:border-l-[3px] md:border-ink md:p-4 lg:p-5">
+              <div class="relative flex h-[clamp(190px,52vw,300px)] gap-[3px] overflow-hidden border-[3px] border-ink bg-ink transition-shadow md:h-[200px] lg:h-[260px] group-hover:shadow-[-7px_0_0_var(--color-cyan),7px_0_0_var(--color-magenta)]">
+                {p.thumbnails.map((src) => (
+                  <Img src={src} alt="" width={900} class="h-full min-w-0 flex-1 object-cover transition-[filter,transform] group-hover:-translate-x-[3px] group-hover:contrast-[1.15] group-hover:saturate-[1.4]" />
+                ))}
+                <div class="scanlines pointer-events-none absolute inset-0 [--scan:.18]"></div>
+                <div class="bg-marble pointer-events-none absolute inset-x-0 top-[46%] hidden h-[18px] animate-[band_.6s_steps(1)_infinite] opacity-70 group-hover:block"></div>
+                <div class="pointer-events-none absolute inset-0 hidden items-center justify-center group-hover:flex">
+                  <span class="border-2 border-cream bg-ink px-[18px] py-2.5 font-vt text-[40px] leading-none text-cream chroma-2">{watch}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col justify-center gap-3 px-4 pt-4 pb-6 md:border-l-[3px] md:border-ink md:gap-3.5 md:p-6 lg:px-9 lg:py-7">
+              <span class="font-vt text-[24px] leading-none text-bordeaux lg:text-[26px]">{p.genre} · {p.year}</span>
+              <h3 class="m-0 font-display text-h3-xl leading-none text-ink group-hover:chroma-3">{p.title}</h3>
+              <p class="m-0 max-w-[640px] leading-normal">{p.description}</p>
+              <ul class="m-0 mt-1 flex list-none flex-wrap gap-2.5 p-0" role="list" aria-label="Outils">
+                {p.tags.map((t) => <li class="border-2 border-ink bg-cream px-3 py-1.5 font-vt text-[22px] leading-none">{t}</li>)}
+              </ul>
+            </div>
+          </Tag>
+        </li>
+      );
+    })}
+  </ul>
+</div>

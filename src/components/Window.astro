@@ -1,0 +1,24 @@
+---
+// Fenêtre « ordinateur rétro » : barre de titre rayée + nom de fichier.
+// Utilisée partout dans la maquette (citation.txt, stage.exe, portrait.jpg…).
+interface Props {
+  title: string;
+  /** couleur de fond (et des rayures) */
+  bg?: string;
+  /** petit carré « fermer » à gauche de la barre */
+  box?: boolean;
+  class?: string;
+  style?: string;
+  as?: string;
+  [key: string]: any;
+}
+const { title, bg = 'var(--color-cream)', box = true, class: className = '', style = '', as: Tag = 'div', ...rest } = Astro.props;
+---
+<Tag class:list={['flex flex-col border-[3px] border-ink text-ink', className]} style={`background:${bg};--bar:${bg};${style}`} {...rest}>
+  <div class="win-stripes flex h-[30px] shrink-0 items-center gap-2.5 border-b-[3px] border-ink px-2" aria-hidden="true">
+    {box ? <span class="size-4 shrink-0 border-2 border-ink" style={`background:${bg}`}></span> : <span class="w-4 shrink-0"></span>}
+    <span class="mx-auto truncate px-3 font-vt text-[20px] leading-none sm:text-[22px]" style={`background:${bg}`}>{title}</span>
+    <span class="w-4 shrink-0"></span>
+  </div>
+  <slot />
+</Tag>

@@ -1,0 +1,28 @@
+---
+// Tout ce qui fait « télé cathodique » par-dessus le site :
+// lignes de balayage, barre lumineuse qui défile, vignettage, bord
+// arrondi de l'écran, compteur ▶ PLAY et écran de neige du zapping.
+// transition:persist → ces éléments ne sont pas recréés d'une page à
+// l'autre (les animations continuent sans à-coup).
+---
+<div transition:persist="tv-layer" aria-hidden="true">
+  <!-- OSD fixe en bas à gauche -->
+  <div class="pointer-events-none fixed bottom-4 left-4 z-[800] flex gap-3 bg-ink/55 px-2.5 py-1 font-vt text-[22px] leading-none text-cream [text-shadow:2px_2px_0_#000,-1px_0_#2EE6D6,1px_0_#FF2E88] sm:bottom-7 sm:left-[34px] sm:gap-[18px] sm:px-3 sm:py-1.5 sm:text-[30px]">
+    <span>▶ PLAY</span><span data-tc>SP 00:00:26</span>
+  </div>
+
+  <!-- Effets cathodiques -->
+  <div class="scanlines pointer-events-none fixed inset-0 z-[900] animate-flick [--scan:.16]"></div>
+  <div class="pointer-events-none fixed inset-x-0 top-0 z-[901] h-[140px] animate-roll bg-[linear-gradient(180deg,transparent,rgba(255,255,255,.035),transparent)]"></div>
+  <div class="pointer-events-none fixed inset-0 z-[902] bg-[radial-gradient(ellipse_75%_70%_at_50%_50%,transparent_60%,rgba(0,0,0,.42)_100%)]"></div>
+  <div class="pointer-events-none fixed inset-1 z-[903] rounded-[18px/14px] shadow-[0_0_0_14px_#0b0405,inset_0_0_40px_rgba(0,0,0,.55),inset_0_0_6px_rgba(219,188,218,.25)] sm:inset-1.5 sm:rounded-[34px/28px] sm:shadow-[0_0_0_30px_#0b0405,inset_0_0_60px_rgba(0,0,0,.55),inset_0_0_6px_rgba(219,188,218,.25)]"></div>
+
+  <!-- Écran de neige (zapping entre les pages) -->
+  <div id="snow" class="pointer-events-none fixed inset-0 z-[950] bg-[#111] opacity-0 transition-none">
+    <canvas width="320" height="180" class="block size-full [image-rendering:pixelated]"></canvas>
+    <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 px-4 text-center">
+      <span data-snow-ch class="font-vt text-[84px] leading-[.8] text-ch-green [text-shadow:3px_3px_0_#000,-3px_0_#2EE6D6,3px_0_#FF2E88] sm:text-[120px]">CH 01</span>
+      <span class="bg-ink px-5 py-1.5 font-vt text-[30px] text-cream chroma-2 sm:text-[44px]">RECHERCHE DU SIGNAL…</span>
+    </div>
+  </div>
+</div>
