@@ -1,7 +1,9 @@
 ---
-// Affiche une image de PocketBase, optimisée en WebP au moment du build.
+// Affiche une image de PocketBase, optimisée en WebP au moment du build,
+// sans la déformer (la hauteur suit toujours les proportions d'origine).
 import { Image } from 'astro:assets';
 import type { Media } from '../lib/data';
+import { fit } from '../lib/media';
 
 interface Props {
   src: Media;
@@ -13,10 +15,6 @@ interface Props {
   loading?: 'lazy' | 'eager';
 }
 const { src, alt = '', class: className, style, width = 1400, loading = 'lazy' } = Astro.props;
-const remote = typeof src === 'string';
+const size = await fit(src, width);
 ---
-{remote ? (
-  <Image src={src as string} alt={alt} inferSize width={width} format="webp" quality={82} loading={loading} decoding="async" class={className} style={style} />
-) : (
-  <Image src={src as ImageMetadata} alt={alt} width={Math.min(width, (src as ImageMetadata).width)} format="webp" quality={82} loading={loading} decoding="async" class={className} style={style} />
-)}
+<Image src={src as any} alt={alt} width={size.width} height={size.height} format="webp" quality={82} loading={loading} decoding="async" class={className} style={style} />

@@ -78,11 +78,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
       <div class="flex flex-col gap-4 border-[3px] border-ink bg-ink p-3 shadow-[10px_10px_0_var(--color-bordeaux)] sm:p-4 sm:shadow-[14px_14px_0_var(--color-bordeaux)]"
         data-carousel data-index="0" data-ms="460" tabindex="0" aria-roledescription="carrousel" aria-label="Mes inspirations créatives">
-        <div data-screen class="relative h-[clamp(260px,min(95vw,calc(100svh-320px)),560px)] overflow-hidden rounded-[18px/14px] bg-black sm:rounded-[28px/22px] lg:h-[clamp(300px,calc(100svh-290px),560px)]">
+        <div data-screen class="relative h-[clamp(340px,95vw,560px)] overflow-hidden rounded-[18px/14px] bg-black sm:rounded-[28px/22px] lg:h-[560px]">
           {inspirations.map((c, i) => (
             <div data-slide hidden={i !== 0} class="grid h-full grid-cols-2 gap-1 [grid-auto-rows:minmax(0,1fr)] md:flex">
               {c.photos.map((src, j) => (
-                <Img src={src} alt={`${c.name} — photo ${j + 1}`} width={1000} style={`object-position:${c.positions[j] || '50% 50%'}`} class:list={['size-full min-w-0 object-contain md:flex-1', c.photos.length % 2 === 1 && j === 0 ? 'col-span-2' : '', c.photos.length <= 2 ? 'row-span-2' : '']} />
+                <Img src={src} alt={`${c.name} — photo ${j + 1}`} width={1200} style={`object-position:${c.positions[j] || '50% 50%'}`}
+                  class:list={['size-full min-w-0 object-cover md:flex-1', c.photos.length % 2 === 1 && j === 0 ? 'col-span-2' : '', c.photos.length <= 2 ? 'row-span-2' : '']} />
               ))}
             </div>
           ))}
