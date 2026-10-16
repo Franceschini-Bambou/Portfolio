@@ -1,0 +1,136 @@
+---
+// CH 03 — À PROPOS
+import Base from '../layouts/Base.astro';
+import HeroBackdrop from '../components/HeroBackdrop.astro';
+import ChannelNumber from '../components/ChannelNumber.astro';
+import Window from '../components/Window.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Img from '../components/Img.astro';
+import { getContent } from '../lib/data';
+import { mediaUrl } from '../lib/media';
+
+const { site, skills, inspirations, tools } = await getContent();
+const portrait = site.portrait!;
+const portraitUrl = await mediaUrl(portrait, 900);
+const skillColors = ['#4F86A6', '#8CBF6F', '#E2B84A'];
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+<Base title="À propos" label="CH 03 À propos" description="Bambou Franceschini, étudiante en 2e année de BUT MMI à Montbéliard : compétences, inspirations et outils.">
+  <!-- HÉROS -->
+  <section class="relative overflow-hidden bg-ink">
+    <HeroBackdrop opacity={0.14} />
+    <div class="relative mx-auto flex max-w-[1440px] flex-col gap-7 px-4 pt-6 pb-20 sm:px-6 lg:px-14 lg:pt-7 lg:pb-[100px]">
+      <div class="flex items-start justify-between gap-4">
+        <span class="font-vt text-[20px] text-rose sm:text-[28px]">CH 03 — Portrait de l'artiste</span>
+        <ChannelNumber n={3} />
+      </div>
+      <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-16">
+        <div class="flex flex-col gap-6 lg:gap-[30px]">
+          <h1 class="m-0 animate-jit font-display text-h1-about leading-[.86] text-cream chroma-3 sm:chroma-6">À<br />propos</h1>
+          <p class="m-0 text-lead leading-[1.35] font-medium">Bambou, étudiante en 2e année de BUT MMI à Montbéliard, spécialisée en création numérique.</p>
+          <p class="m-0 max-w-[640px] leading-[1.6] text-cream">Apprendre, créer, imaginer me rythme au quotidien. J'aime apporter de l'originalité et de la couleur à mes projets, et je suis toujours partante pour expérimenter et me lancer dans de nouvelles aventures créatives.</p>
+        </div>
+        <Window title="bambou.jpg" class="-rotate-[1.2deg] shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]">
+          <div class="relative m-3 h-[clamp(300px,82vw,480px)] overflow-hidden border-[3px] border-ink sm:m-3.5 lg:h-[480px]">
+            <Img src={portrait} alt="Portrait de Bambou Franceschini" width={1000} loading="eager" class="absolute inset-0 size-full object-cover contrast-[1.1] grayscale" />
+            <div class="absolute inset-0 bg-rose mix-blend-multiply" aria-hidden="true"></div>
+            <div class="absolute inset-x-0 top-[42%] h-3.5 animate-[band_3s_steps(1)_infinite] bg-cover bg-center mix-blend-screen grayscale" style={`background-image:url(${portraitUrl})`} aria-hidden="true"></div>
+            <div class="scanlines pointer-events-none absolute inset-0 [--scan:.2]" aria-hidden="true"></div>
+            <span class="absolute top-3 left-4 font-vt text-[28px] text-cream [text-shadow:2px_2px_0_#000]" aria-hidden="true">▶ PLAY</span>
+          </div>
+        </Window>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compétences -->
+  <section class="bg-cream text-ink">
+    <div class="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 py-20 sm:px-6 lg:gap-11 lg:px-14 lg:py-[110px]">
+      <div class="flex flex-col gap-4 lg:gap-[18px]">
+        <Eyebrow>(01) — {skills.length} savoir-faire</Eyebrow>
+        <h2 class="m-0 font-display text-h2 leading-[.9] text-bordeaux chroma-3 sm:chroma-5">Compétences</h2>
+      </div>
+      <ul class="m-0 grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3 lg:gap-7" role="list">
+        {skills.map((k, i) => (
+          <li class="flex flex-col border-[3px] border-ink bg-cream shadow-[8px_8px_0_var(--color-ink)] transition-[transform,box-shadow] hover:-translate-x-[3px] hover:-translate-y-[3px] hover:shadow-[11px_11px_0_var(--color-bordeaux)]">
+            <div class="h-3.5 border-b-[3px] border-ink" style={`background:${skillColors[i % 3]}`} aria-hidden="true"></div>
+            <div class="flex flex-col gap-3.5 px-6 pt-6 pb-7 sm:px-7 sm:pb-[30px]">
+              <span class="font-vt text-vt-lg text-bordeaux" aria-hidden="true">({pad(i + 1)}) —</span>
+              <h3 class="m-0 font-display text-[clamp(1.4rem,1.95vw,1.75rem)] leading-[1.1]">{k.title}</h3>
+              <p class="m-0 leading-normal">{k.description}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Inspirations : carrousel à chaînes -->
+  <section class="border-t-[3px] border-ink bg-rose text-ink">
+    <div class="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 py-20 sm:px-6 lg:px-14 lg:py-[110px]">
+      <div class="grid grid-cols-1 items-end gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-14">
+        <div class="flex flex-col gap-4 lg:gap-[18px]">
+          <Eyebrow>(02) — Zapping</Eyebrow>
+          <h2 class="m-0 font-display text-[clamp(2.2rem,6.1vw,5.5rem)] leading-[.9] text-bordeaux chroma-3 sm:chroma-5">Mes inspirations créatives</h2>
+        </div>
+        <p class="m-0 leading-[1.6]">Qu'il s'agisse de découvertes culturelles, de l'énergie de la danse ou de moments de partage, voici un petit aperçu de tout ce qui nourrit mon imagination et donne vie à ma créativité au quotidien.</p>
+      </div>
+
+      <div class="flex flex-col gap-4 border-[3px] border-ink bg-ink p-3 shadow-[10px_10px_0_var(--color-bordeaux)] sm:p-4 sm:shadow-[14px_14px_0_var(--color-bordeaux)]"
+        data-carousel data-index="0" data-ms="460" tabindex="0" aria-roledescription="carrousel" aria-label="Mes inspirations créatives">
+        <div data-screen class="relative h-[clamp(340px,95vw,560px)] overflow-hidden rounded-[18px/14px] bg-black sm:rounded-[28px/22px] lg:h-[560px]">
+          {inspirations.map((c, i) => (
+            <div data-slide hidden={i !== 0} class="grid h-full grid-cols-2 gap-1 [grid-auto-rows:minmax(0,1fr)] md:flex">
+              {c.photos.map((src, j) => (
+                <Img src={src} alt={`${c.name} — photo ${j + 1}`} width={1000} class:list={['size-full min-w-0 object-cover md:flex-1', c.photos.length % 2 === 1 && j === 0 ? 'col-span-2' : '', c.photos.length <= 2 ? 'row-span-2' : '']} />
+              ))}
+            </div>
+          ))}
+          <div class="scanlines pointer-events-none absolute inset-0" aria-hidden="true"></div>
+          <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,.55))]" aria-hidden="true"></div>
+          <span class="absolute top-4 right-5 font-vt text-[64px] leading-[.8] text-ch-green [text-shadow:3px_3px_0_#000,-3px_0_#2EE6D6,3px_0_#FF2E88] sm:top-5 sm:right-7 sm:text-[96px]" aria-hidden="true">CH <span data-label={JSON.stringify(inspirations.map((_, i) => String(i + 1)))}>1</span></span>
+          <span class="absolute bottom-4 left-4 bg-ink px-3 pt-2 pb-1.5 font-display text-[26px] leading-none text-cream chroma-2 sm:bottom-[22px] sm:left-[26px] sm:px-4 sm:pt-2.5 sm:pb-2 sm:text-[40px]" data-label={JSON.stringify(inspirations.map((c) => c.name))}>{inspirations[0]?.name}</span>
+          <canvas data-noise width="240" height="120" class="pointer-events-none absolute inset-0 size-full opacity-0 [image-rendering:pixelated]" aria-hidden="true"></canvas>
+        </div>
+
+        <div class="grid grid-cols-2 items-center gap-3 lg:flex lg:justify-between lg:gap-4">
+          <button type="button" data-prev class="remote-key order-1 border-[3px] border-cream bg-cream px-6 py-2.5 font-vt text-[32px] leading-none text-ink shadow-[0_5px_0_#000] hover:bg-bordeaux hover:text-cream" aria-label="Chaîne précédente">CH −</button>
+          <div class="order-3 col-span-2 grid grid-cols-2 gap-2.5 md:grid-cols-4 lg:order-2 lg:flex" role="group" aria-label="Choisir une chaîne">
+            {inspirations.map((c, i) => (
+              <button type="button" data-goto={i} aria-pressed={i === 0 ? 'true' : 'false'}
+                class="border-2 border-cream bg-transparent px-4 py-2 font-vt text-[22px] leading-none text-cream hover:chroma-2 aria-pressed:bg-bordeaux sm:text-[24px] lg:whitespace-nowrap">
+                {i + 1} · {c.name.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <button type="button" data-next class="remote-key order-2 border-[3px] border-cream bg-cream px-6 py-2.5 font-vt text-[32px] leading-none text-ink shadow-[0_5px_0_#000] hover:bg-bordeaux hover:text-cream lg:order-3" aria-label="Chaîne suivante">CH +</button>
+        </div>
+        <p class="sr-only" aria-live="polite" data-live></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Outils -->
+  <section class="border-t-[3px] border-ink bg-cream text-ink">
+    <div class="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 py-20 sm:px-6 lg:gap-11 lg:px-14 lg:py-[110px]">
+      <div class="flex flex-col gap-4 lg:gap-[18px]">
+        <Eyebrow>(03) — Régie technique</Eyebrow>
+        <h2 class="m-0 font-display text-h2-sm leading-[.9] text-bordeaux chroma-3 sm:chroma-5">Outils &amp; technologies</h2>
+      </div>
+      <ul class="m-0 grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7" role="list">
+        {tools.map((g) => (
+          <li>
+            <Window title={g.fileLabel} bg={g.color} box={false} class="h-full shadow-[8px_8px_0_var(--color-ink)]">
+              <div class="flex flex-1 flex-col gap-4 bg-cream px-6 pt-[22px] pb-[26px]">
+                <h3 class="m-0 font-display text-[clamp(1.6rem,2.23vw,2rem)] leading-none">{g.name}</h3>
+                <ul class="m-0 flex list-none flex-wrap gap-2 p-0" role="list">
+                  {g.items.map((t) => <li class="border-2 border-ink px-3 py-1.5 font-vt text-[24px] leading-none" style={`background:${g.color}`}>{t}</li>)}
+                </ul>
+              </div>
+            </Window>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>
