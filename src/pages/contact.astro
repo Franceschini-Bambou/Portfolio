@@ -1,0 +1,83 @@
+---
+// CH 04 — CONTACT (le formulaire enregistre les messages dans PocketBase)
+import Base from '../layouts/Base.astro';
+import HeroBackdrop from '../components/HeroBackdrop.astro';
+import ChannelNumber from '../components/ChannelNumber.astro';
+import Window from '../components/Window.astro';
+import Btn from '../components/Btn.astro';
+import { getContent } from '../lib/data';
+
+const { site } = await getContent();
+const contacts = [
+  { label: 'EMAIL', value: site.email, href: `mailto:${site.email}` },
+  { label: 'LINKEDIN', value: site.linkedinLabel, href: site.linkedin },
+  { label: 'INSTAGRAM', value: site.instagramLabel, href: site.instagram },
+  { label: 'BEHANCE', value: site.behanceLabel, href: site.behance },
+];
+const field = 'w-full border-[3px] border-ink bg-white px-4 py-3.5 font-sans text-[18px] text-ink outline-none focus:shadow-[-4px_0_0_var(--color-cyan),4px_0_0_var(--color-magenta)] sm:text-[20px]';
+---
+<Base title="Contact" label="CH 04 Contact" description="Contacter Bambou Franceschini : projet, stage du 29 mars au 4 juin 2027, ou simple échange.">
+  <section class="relative overflow-hidden bg-ink">
+    <HeroBackdrop opacity={0.14} bands={[{ top: '22%', h: 18, delay: '3s' }]} />
+    <div class="relative mx-auto flex max-w-[1440px] flex-col gap-6 px-4 pt-6 pb-20 sm:px-6 lg:gap-[30px] lg:px-14 lg:pt-7 lg:pb-[110px]">
+      <div class="flex items-start justify-between gap-4">
+        <span class="flex gap-2.5 font-vt text-[20px] text-rose sm:text-[28px]"><span class="animate-blink text-magenta" aria-hidden="true">●</span>ANTENNE OUVERTE</span>
+        <ChannelNumber n={4} />
+      </div>
+      <h1 class="m-0 animate-jit font-display text-contact leading-[.86] text-cream chroma-3 sm:chroma-6">Contact</h1>
+
+      <div class="mt-3 grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14">
+        <div class="flex flex-col gap-8">
+          <p class="m-0 text-lead leading-[1.35] font-medium">Un projet en tête, une opportunité de stage, ou simplement envie d'échanger sur le design ou la danse&nbsp;? N'hésitez pas à m'écrire&nbsp;!</p>
+
+          <Window title="infos.txt" class="shadow-[8px_8px_0_var(--color-bordeaux)]">
+            <ul class="m-0 flex list-none flex-col p-0" role="list">
+              {contacts.map((c) => (
+                <li>
+                  <a href={c.href} target={c.href.startsWith('http') ? '_blank' : undefined} rel={c.href.startsWith('http') ? 'noopener' : undefined}
+                    class="chroma-hover grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 border-b-2 border-ink px-4 py-3.5 font-medium text-ink no-underline hover:bg-rose sm:grid-cols-[130px_minmax(0,1fr)_auto] sm:px-5">
+                    <span class="col-span-2 font-vt text-[22px] text-bordeaux sm:col-span-1 sm:text-[24px]">{c.label}</span>
+                    <span class="[overflow-wrap:anywhere]">{c.value}</span>
+                    <span class="font-vt text-[24px]" aria-hidden="true">▶</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <div class="px-4 py-4 sm:px-5">
+              {site.cv ? (
+                <Btn href={site.cv} variant="rose" prefix="⏏" target="_blank" rel="noopener" download>Mon CV (PDF)</Btn>
+              ) : (
+                <Btn variant="rose" prefix="⏏" disabled title="CV à ajouter dans PocketBase" class="opacity-70">Mon CV (PDF)</Btn>
+              )}
+            </div>
+          </Window>
+
+          <Window title="stage.exe" bg="var(--color-rose)" class="shadow-[8px_8px_0_var(--color-bordeaux)]">
+            <p class="m-0 px-6 py-[22px] text-[clamp(1.125rem,1.53vw,1.375rem)] leading-[1.4] font-medium">À la recherche d'un stage {site.stage}</p>
+          </Window>
+        </div>
+
+        <Window as="form" title="message.exe" class="shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]" data-contact data-astro-reload>
+          <div data-form-fields class="flex flex-col gap-5 px-5 pt-6 pb-7 sm:gap-[22px] sm:px-8 sm:pt-[30px] sm:pb-[34px]">
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <label class="flex flex-col gap-2"><span class="font-vt text-[24px] text-bordeaux">NOM</span><input required name="nom" autocomplete="family-name" class={field} /></label>
+              <label class="flex flex-col gap-2"><span class="font-vt text-[24px] text-bordeaux">PRÉNOM</span><input required name="prenom" autocomplete="given-name" class={field} /></label>
+            </div>
+            <label class="flex flex-col gap-2"><span class="font-vt text-[24px] text-bordeaux">EMAIL</span><input required type="email" name="email" autocomplete="email" class={field} /></label>
+            <label class="flex flex-col gap-2"><span class="font-vt text-[24px] text-bordeaux">MESSAGE</span><textarea required name="message" rows="7" class={`${field} resize-y leading-normal`}></textarea></label>
+            <!-- Champ piège pour les robots (invisible pour les humains) -->
+            <label class="absolute -left-[9999px]" aria-hidden="true">Site web<input name="site_web" tabindex="-1" autocomplete="off" /></label>
+            <p class="m-0 text-[16px] leading-snug">Tes informations servent uniquement à te répondre. <a href="/politique-de-confidentialite/" class="text-bordeaux">En savoir plus</a>.</p>
+            <Btn type="submit" variant="bordeaux" prefix="● REC" class="self-start px-[30px]!">Envoyer</Btn>
+            <p data-status hidden class="m-0 font-vt text-[24px] text-bordeaux" role="status"></p>
+          </div>
+          <div data-form-sent hidden tabindex="-1" class="flex flex-col items-center gap-3.5 px-8 py-20 text-center outline-none">
+            <span class="font-vt text-[56px] leading-none text-bordeaux chroma-3 sm:text-[72px]">■ STOP</span>
+            <span class="font-display text-[clamp(1.75rem,2.5vw,2.25rem)] leading-[1.1]">Message transmis</span>
+            <span class="leading-normal">Merci ! Je te réponds au plus vite.</span>
+          </div>
+        </Window>
+      </div>
+    </div>
+  </section>
+</Base>
