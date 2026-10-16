@@ -1,0 +1,43 @@
+---
+// CH 02 — MES PROJETS (guide des programmes + filtres)
+import Base from '../../layouts/Base.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import ChannelNumber from '../../components/ChannelNumber.astro';
+import ProgramGuide from '../../components/ProgramGuide.astro';
+import { getContent, genreColors } from '../../lib/data';
+
+const { projects } = await getContent();
+const filters = Object.keys(genreColors).map((label) => ({
+  label,
+  dot: genreColors[label],
+  count: label === 'Tous' ? projects.length : projects.filter((p) => p.genre === label).length,
+}));
+---
+<Base title="Mes projets" label="CH 02 Projets" description="Les projets de Bambou Franceschini : audiovisuel, graphisme et communication.">
+  <section class="border-t-[3px] border-ink bg-rose text-ink">
+    <div class="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 pt-8 pb-24 sm:px-6 lg:gap-12 lg:px-14 lg:pt-[110px] lg:pb-[120px]">
+      <div class="flex flex-col gap-6 lg:gap-7">
+        <div class="flex items-start justify-between gap-4">
+          <Eyebrow>CH 02 — Guide des programmes</Eyebrow>
+          <ChannelNumber n={2} color="text-bordeaux chroma-3" />
+        </div>
+        <h1 class="m-0 font-display text-h1-projets leading-[.86] text-bordeaux chroma-3 sm:chroma-6">Mes<br />projets</h1>
+        <p class="m-0 max-w-[760px] text-lead-sm leading-[1.4] font-medium">Trois émissions au programme, entre audiovisuel, graphisme et communication.</p>
+
+        <div class="mt-2 flex flex-wrap items-center gap-3" role="group" aria-label="Filtrer les projets">
+          <span class="mr-1.5 w-full font-vt text-[26px] sm:w-auto" aria-hidden="true">FILTRER ▸</span>
+          {filters.map((f, i) => (
+            <button type="button" data-filter={f.label} aria-pressed={i === 0 ? 'true' : 'false'}
+              class="btn-retro border-[3px] border-ink bg-cream px-3.5 py-2 text-[17px] text-ink [--sh-x:4px] [--sh-y:4px] [--sh:var(--color-ink)] aria-pressed:bg-ink aria-pressed:text-cream aria-pressed:[--sh:var(--color-bordeaux)] sm:px-[18px] sm:py-2.5 sm:text-[20px]">
+              <span class="size-3.5 border-2 border-ink" style={`background:${f.dot}`} aria-hidden="true"></span>
+              {f.label}
+              <span class="font-vt text-[22px] font-normal">({f.count})</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <ProgramGuide projects={projects} filterable />
+    </div>
+  </section>
+</Base>

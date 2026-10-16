@@ -1,0 +1,248 @@
+---
+// PAGE PROJET (une page par projet publié, générée depuis PocketBase)
+import Base from '../../layouts/Base.astro';
+import HeroBackdrop from '../../components/HeroBackdrop.astro';
+import ChannelNumber from '../../components/ChannelNumber.astro';
+import Window from '../../components/Window.astro';
+import Btn from '../../components/Btn.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import Img from '../../components/Img.astro';
+import { getContent, neighbours, type Project } from '../../lib/data';
+import { mediaUrl } from '../../lib/media';
+
+export async function getStaticPaths() {
+  const { projects } = await getContent();
+  return projects.filter((p) => p.hasPage).map((p) => ({ params: { slug: p.slug }, props: { project: p } }));
+}
+
+const { project: pj } = Astro.props as { project: Project };
+const { projects } = await getContent();
+const { prev, next } = neighbours(projects, pj.slug);
+const heroUrl = await mediaUrl(pj.hero, 1200);
+const posterUrl = await mediaUrl(pj.videoPoster ?? pj.hero, 1600);
+const pad = (n: number) => String(n).padStart(2, '0');
+const steps = pj.steps.map((text, i) => ({ text, n: pad(i + 1), file: `etape_${pad(i + 1)}.txt` }));
+const hasGallery = pj.gallery.length > 0;
+const hasVideo = !!pj.video || !!pj.videoPoster;
+const links = [
+  { p: prev, dir: '◀ ÉMISSION PRÉCÉDENTE' },
+  { p: next, dir: 'ÉMISSION SUIVANTE ▶' },
+];
+---
+<Base title={pj.title} label={`Projet — ${pj.title}`} description={pj.description}>
+  <!-- HÉROS -->
+  <section class="relative overflow-hidden bg-ink">
+    <HeroBackdrop opacity={0.13} bands={[{ top: '44%', h: 16, delay: '3s' }]} />
+    <div class="relative mx-auto flex max-w-[1440px] flex-col gap-6 px-4 pt-6 pb-16 sm:px-6 lg:gap-[30px] lg:px-14 lg:pt-7 lg:pb-[90px]">
+      <div class="flex items-start justify-between gap-4">
+        <Btn href="/projets/" variant="outline" prefix="◀"><span>Retour<span class="max-sm:sr-only"> aux projets</span></span></Btn>
+        <div class="flex flex-col items-end gap-1.5">
+          <ChannelNumber n={2} />
+          <span class="font-vt text-[20px] text-rose sm:text-[26px]">{pj.time} · EN DIFFUSION</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3.5">
+        <span class="px-2.5 py-[5px] font-vt text-[24px] leading-none text-ink" style={`background:${pj.color}`}>{pj.genre}</span>
+        <span class="font-vt text-[28px] text-cream">{pj.year}</span>
+      </div>
+      <h1 class="m-0 animate-[jit_4.5s_infinite] font-display text-h1-project leading-[.9] text-balance text-cream chroma-3 sm:chroma-6">{pj.title}</h1>
+
+      <div class="mt-3.5 grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-14">
+        <div class="flex flex-col gap-8">
+          <p class="m-0 text-lead-sm leading-[1.4] font-medium">{pj.description}</p>
+          <Window title="fiche.txt" class="shadow-[8px_8px_0_var(--color-bordeaux)]">
+            <dl class="m-0 grid grid-cols-[96px_minmax(0,1fr)] sm:grid-cols-[140px_minmax(0,1fr)]">
+              <dt class="border-b-2 border-ink px-4 py-3.5 font-vt text-[24px] text-bordeaux sm:px-5">TYPE</dt>
+              <dd class="m-0 border-b-2 border-l-2 border-ink px-4 py-3.5 font-medium sm:px-5">{pj.genre}</dd>
+              <dt class="border-b-2 border-ink px-4 py-3.5 font-vt text-[24px] text-bordeaux sm:px-5">ANNÉE</dt>
+              <dd class="m-0 border-b-2 border-l-2 border-ink px-4 py-3.5 font-medium sm:px-5">{pj.year}</dd>
+              <dt class="px-4 py-3.5 font-vt text-[24px] text-bordeaux sm:px-5">OUTILS</dt>
+              <dd class="m-0 flex flex-wrap gap-2 border-l-2 border-ink px-4 py-3 sm:px-5">
+                {pj.tags.map((t) => <span class="border-2 border-ink px-2.5 py-1.5 font-vt text-[22px] leading-none" style={`background:${pj.color}`}>{t}</span>)}
+              </dd>
+            </dl>
+          </Window>
+        </div>
+
+        {hasGallery ? (
+          <Window title="affiches.tv" bg="var(--color-rose)" class="shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]"
+            data-carousel data-index="0" data-ms="420" tabindex="0" aria-roledescription="carrousel" aria-label="Les affiches">
+            <div data-screen class="relative m-3 flex h-[clamp(380px,110vw,520px)] justify-center overflow-hidden border-[3px] border-ink bg-ink sm:m-3.5 lg:h-[520px]">
+              {pj.gallery.map((g, i) => (
+                <div data-slide hidden={i !== 0} class="h-full">
+                  <Img src={g.src} alt={g.title} width={1000} loading={i === 0 ? 'eager' : 'lazy'} class="block h-full w-auto object-contain" />
+                </div>
+              ))}
+              <div class="scanlines pointer-events-none absolute inset-0 [--scan:.2]" aria-hidden="true"></div>
+              <span class="absolute top-3 left-4 font-vt text-[30px] text-cream [text-shadow:2px_2px_0_#000]" aria-hidden="true">AFF <span data-label={JSON.stringify(pj.gallery.map((g) => g.num))}>{pj.gallery[0].num}</span></span>
+              <canvas data-noise width="200" height="120" class="pointer-events-none absolute inset-0 size-full opacity-0 [image-rendering:pixelated]" aria-hidden="true"></canvas>
+            </div>
+            <div class="flex items-center justify-between gap-3 px-3 pb-3.5 sm:px-3.5">
+              <button type="button" data-prev class="btn-retro border-[3px] border-ink bg-cream px-[18px] py-2 font-vt text-[28px] font-normal leading-none text-ink [--sh-x:4px] [--sh-y:4px] hover:bg-bordeaux hover:text-cream" aria-label="Affiche précédente">CH −</button>
+              <span class="text-center font-display text-[18px] leading-[1.1] sm:text-[22px]" data-label={JSON.stringify(pj.gallery.map((g) => g.title))}>{pj.gallery[0].title}</span>
+              <button type="button" data-next class="btn-retro border-[3px] border-ink bg-cream px-[18px] py-2 font-vt text-[28px] font-normal leading-none text-ink [--sh-x:4px] [--sh-y:4px] hover:bg-bordeaux hover:text-cream" aria-label="Affiche suivante">CH +</button>
+            </div>
+            <p class="sr-only" aria-live="polite" data-live></p>
+          </Window>
+        ) : pj.hero ? (
+          <Window title="capture.vhs" bg="var(--color-rose)" class="shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]">
+            <div class="relative m-3 h-[clamp(280px,80vw,500px)] overflow-hidden border-[3px] border-ink bg-black sm:m-3.5 lg:h-[500px]">
+              <Img src={pj.hero} alt={`Capture de la vidéo ${pj.title}`} width={1200} loading="eager" class="absolute inset-0 size-full object-cover" />
+              <div class="absolute inset-x-0 top-[62%] h-2.5 animate-[band_2.4s_steps(1)_infinite] bg-cover bg-center mix-blend-screen" style={`background-image:url(${heroUrl})`} aria-hidden="true"></div>
+              <div class="scanlines pointer-events-none absolute inset-0 [--scan:.25]" aria-hidden="true"></div>
+              <span class="absolute top-3.5 left-4 font-vt text-[30px] text-cream [text-shadow:2px_2px_0_#000]" aria-hidden="true">▶ PLAY</span>
+              <span class="absolute right-4 bottom-3 font-vt text-[30px] text-cream [text-shadow:2px_2px_0_#000]" data-tc aria-hidden="true">SP 00:00:26</span>
+            </div>
+          </Window>
+        ) : null}
+      </div>
+    </div>
+  </section>
+
+  <!-- Contexte / Problématique -->
+  {(pj.context || pj.problem) && (
+    <section class="bg-cream text-ink">
+      <div class="mx-auto grid max-w-[1440px] grid-cols-1 gap-14 px-4 py-20 sm:px-6 xl:grid-cols-2 lg:gap-[72px] lg:px-14 lg:py-[110px]">
+        <div class="flex flex-col gap-5 lg:gap-[22px]">
+          <Eyebrow>(01) —</Eyebrow>
+          <h2 class="m-0 font-display text-h2-xs leading-[.95] text-bordeaux chroma-2 sm:chroma-4">Contexte</h2>
+          <p class="m-0 leading-[1.6]">{pj.context}</p>
+        </div>
+        <div class="flex flex-col gap-5 lg:gap-[22px]">
+          <Eyebrow>(02) —</Eyebrow>
+          <h2 class="m-0 font-display text-h2-xs leading-[.95] text-bordeaux chroma-2 sm:chroma-4">Problématique</h2>
+          <p class="m-0 border-[3px] border-ink bg-rose px-6 py-6 text-lead leading-[1.4] font-medium shadow-[8px_8px_0_var(--color-ink)] sm:px-8 sm:py-7">{pj.problem}</p>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Démarche -->
+  {steps.length > 0 && (
+    <section class="border-t-[3px] border-ink bg-rose text-ink">
+      <div class="mx-auto flex max-w-[1440px] flex-col gap-10 py-20 lg:gap-11 lg:py-[110px]">
+        <div class="flex flex-col gap-4 px-4 sm:px-6 lg:gap-[18px] lg:px-14">
+          <Eyebrow>(03) — En {steps.length} étapes</Eyebrow>
+          <h2 class="m-0 font-display text-h2 leading-[.9] text-bordeaux chroma-3 sm:chroma-5">Démarche</h2>
+          <p class="m-0 font-vt text-[22px] text-bordeaux md:hidden" aria-hidden="true">◀ GLISSER POUR ZAPPER ▶</p>
+        </div>
+        <!-- Mobile : on fait défiler les étapes à l'horizontale ; desktop : 3 colonnes -->
+        <ol class="relative m-0 flex list-none snap-x snap-mandatory gap-5 overflow-x-auto scroll-px-4 px-4 pb-4 [scrollbar-width:none] sm:scroll-px-6 sm:px-6 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:pb-0 lg:px-14" role="list">
+          {steps.map((s) => (
+            <li class="w-[82vw] max-w-[420px] shrink-0 snap-start md:w-auto md:max-w-none">
+              <Window title={s.file} class="h-full shadow-[8px_8px_0_var(--color-ink)]">
+                <div class="flex flex-col gap-4 px-6 pt-6 pb-7 sm:px-7 sm:pb-[30px]">
+                  <span class="stroke-ink font-display text-[56px] leading-none sm:text-[72px]" style={`color:${pj.color}`} aria-hidden="true">{s.n}</span>
+                  <p class="m-0 leading-[1.55]"><span class="sr-only">Étape {s.n} : </span>{s.text}</p>
+                </div>
+              </Window>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  <!-- Vidéo -->
+  {hasVideo && (
+    <section class="bg-ink text-cream">
+      <div class="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 py-20 sm:px-6 lg:px-14 lg:py-[110px]">
+        <div class="flex items-end justify-between gap-6">
+          <div class="flex flex-col gap-4 lg:gap-[18px]">
+            <Eyebrow class="text-rose">(04) — Diffusion</Eyebrow>
+            <h2 class="m-0 font-display text-h2 leading-[.9] chroma-3 sm:chroma-5">Vidéo</h2>
+          </div>
+          <span class="font-vt text-vt-lg text-rose" data-tc aria-hidden="true">SP 00:00:26</span>
+        </div>
+        <div class="relative aspect-video overflow-hidden border-[3px] border-cream bg-black shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]" data-video>
+          {pj.video ? (
+            <video class="absolute inset-0 size-full object-cover" src={pj.video} poster={posterUrl} preload="none" playsinline>
+              Ton navigateur ne lit pas cette vidéo.
+            </video>
+          ) : (
+            posterUrl && <img src={posterUrl} alt={`Vidéo ${pj.title}`} class="absolute inset-0 size-full object-cover" loading="lazy" />
+          )}
+          <div data-video-overlay class="absolute inset-0">
+            <div class="scanlines pointer-events-none absolute inset-0 [--scan:.25]" aria-hidden="true"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <button type="button" data-video-play disabled={!pj.video}
+                class="btn-retro border-[3px] border-cream bg-bordeaux px-6 py-3 font-vt text-[40px] font-normal leading-none text-cream [--sh:#000] [--sh-x:6px] [--sh-y:6px] disabled:cursor-default sm:px-[34px] sm:py-[18px] sm:text-[56px] sm:[--sh-x:8px] sm:[--sh-y:8px]"
+                aria-label={`Lire la vidéo ${pj.title}`}>▶ PLAY</button>
+            </div>
+            <span class="absolute top-3 left-4 font-vt text-[20px] [text-shadow:2px_2px_0_#000] sm:top-[18px] sm:left-[22px] sm:text-[30px]" aria-hidden="true">CANAL BF · {pj.title.toUpperCase()}</span>
+            {!pj.video && <span class="absolute bottom-3 left-4 bg-ink px-2.5 py-1 font-vt text-[20px] text-rose sm:bottom-[18px] sm:left-[22px] sm:text-[24px]">VIDÉO À INTÉGRER</span>}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Les affiches -->
+  {hasGallery && (
+    <section class="bg-ink text-cream">
+      <div class="mx-auto flex max-w-[1440px] flex-col gap-10 py-20 lg:gap-11 lg:py-[110px]">
+        <div class="flex flex-col gap-4 px-4 sm:px-6 lg:gap-[18px] lg:px-14">
+          <Eyebrow class="text-rose">(04) — La série</Eyebrow>
+          <h2 class="m-0 font-display text-h2 leading-[.9] chroma-3 sm:chroma-5">Les affiches</h2>
+          <p class="m-0 font-vt text-[22px] text-rose md:hidden" aria-hidden="true">◀ GLISSER ▶</p>
+        </div>
+        <ul class="relative m-0 flex list-none snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-4 px-4 pb-6 [scrollbar-width:none] sm:scroll-px-6 sm:px-6 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:pb-0 lg:px-14" role="list">
+          {pj.gallery.map((a) => (
+            <li class="w-[78vw] max-w-[380px] shrink-0 snap-start md:w-auto md:max-w-none">
+              <figure class="m-0 flex flex-col gap-4">
+                <div class="relative border-[3px] border-cream bg-black shadow-[10px_10px_0_var(--color-bordeaux)] transition-shadow hover:shadow-[-6px_0_0_var(--color-cyan),6px_0_0_var(--color-magenta)]">
+                  <Img src={a.src} alt={a.title} width={900} class="block h-auto w-full" />
+                </div>
+                <figcaption class="flex items-baseline gap-3"><span class="font-vt text-[26px] text-rose">AFF {a.num}</span><span class="font-display text-[20px] leading-[1.15] sm:text-[22px]">{a.title}</span></figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <!-- Résultat / Mon rôle -->
+  {pj.result && (
+    <section class="bg-cream text-ink">
+      <div class:list={['mx-auto grid max-w-[1440px] grid-cols-1 items-start gap-12 px-4 py-20 sm:px-6 lg:gap-[72px] lg:px-14 lg:py-[110px]', pj.role ? 'lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]' : '']}>
+        <div class="flex flex-col gap-5 lg:gap-[22px]">
+          <Eyebrow>(05) —</Eyebrow>
+          <h2 class="m-0 font-display text-h2 leading-[.9] text-bordeaux chroma-3 sm:chroma-5">Résultat</h2>
+          <p class="m-0 max-w-[860px] text-lead-sm leading-[1.45] font-medium">{pj.result}</p>
+        </div>
+        {pj.role && (
+          <Window title="mon_role.txt" bg="var(--color-rose)" class="shadow-[10px_10px_0_var(--color-bordeaux)] lg:mt-10">
+            <div class="flex flex-col gap-3.5 px-6 py-6 sm:px-[30px] sm:py-[26px]">
+              <h3 class="m-0 font-display text-[clamp(2rem,3.06vw,2.75rem)] leading-none text-bordeaux">Mon rôle</h3>
+              <p class="m-0 leading-[1.55]">{pj.role}</p>
+            </div>
+          </Window>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- Émission précédente / suivante -->
+  <section class="border-t-[3px] border-ink bg-rose text-ink">
+    <div class="mx-auto flex max-w-[1440px] flex-col items-center gap-10 px-4 pt-16 pb-24 sm:px-6 lg:px-14 lg:pt-20 lg:pb-[100px]">
+      <nav class="grid w-full grid-cols-1 gap-6 xl:grid-cols-2 xl:gap-8" aria-label="Autres émissions">
+        {links.map(({ p, dir }) => {
+          const Tag = p.hasPage ? 'a' : 'div';
+          return (
+            <Tag href={p.hasPage ? `/projets/${p.slug}/` : undefined}
+              class:list={['grid grid-cols-[110px_minmax(0,1fr)] border-[3px] border-ink bg-cream text-ink no-underline shadow-[8px_8px_0_var(--color-ink)] transition-shadow sm:grid-cols-[180px_minmax(0,1fr)]', p.hasPage ? 'cursor-pointer hover:shadow-[-6px_0_0_var(--color-cyan),6px_0_0_var(--color-magenta),8px_8px_0_var(--color-ink)]' : 'cursor-default']}>
+              {p.thumbnails[0] && <Img src={p.thumbnails[0]} alt="" width={500} class="block h-full min-h-[130px] w-full border-r-[3px] border-ink object-cover sm:h-[170px]" />}
+              <div class="flex min-w-0 flex-col justify-center gap-2 px-4 py-4 break-words sm:px-[26px] sm:py-5">
+                <span class="font-vt text-[20px] text-bordeaux sm:text-[24px]">{dir}</span>
+                <span class="font-display text-[22px] leading-[1.05] sm:text-[32px]">{p.title}</span>
+                <span class="font-vt text-[20px] sm:text-[22px]">{p.genre} · {p.year}{!p.hasPage && ' · BIENTÔT'}</span>
+              </div>
+            </Tag>
+          );
+        })}
+      </nav>
+      <Btn href="/projets/" variant="ink" prefix="CH 02">Retour aux projets</Btn>
+    </div>
+  </section>
+</Base>
