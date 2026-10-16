@@ -1,1 +1,179 @@
+/* ==========================================================
+   CANAL BF — styles globaux
+   Tailwind v4 : les couleurs, polices et tailles de la maquette
+   sont déclarées dans @theme et deviennent des classes
+   (ex. bg-bordeaux, text-cream, font-display, text-h2…).
+   ========================================================== */
 @import "tailwindcss";
+
+/* Polices hébergées localement (plus léger, aucun appel à Google) */
+@import "@fontsource/bungee/latin-400.css";
+@import "@fontsource/vt323/latin-400.css";
+@import "@fontsource/roboto/latin-400.css";
+@import "@fontsource/roboto/latin-500.css";
+@import "@fontsource/roboto/latin-700.css";
+
+@theme {
+  --breakpoint-wide: 87.5rem; /* 1400px : en-tête complet */
+  /* --- Couleurs de la maquette --- */
+  --color-ink: #1d0b0c;          /* noir écran */
+  --color-bordeaux: #6f080c;     /* couleur principale */
+  --color-rose: #dbbcda;
+  --color-cream: #fbf5ec;
+  --color-ch-blue: #4f86a6;      /* chaînes / projets */
+  --color-ch-green: #8cbf6f;
+  --color-ch-yellow: #e2b84a;
+  --color-cyan: #2ee6d6;         /* aberration chromatique */
+  --color-magenta: #ff2e88;
+  --color-panel: #2b1314;        /* fond de la télécommande */
+  --color-panel-line: #3d1c1d;
+  --color-mire: #d9d4cc;
+  --color-bezel: #0b0405;
+  --color-led: #c9b9b0;
+
+  /* --- Polices --- */
+  --font-display: "Bungee", "Arial Black", sans-serif;
+  --font-vt: "VT323", ui-monospace, monospace;
+  --font-sans: "Roboto", system-ui, sans-serif;
+
+  /* --- Échelle typographique fluide ---
+     La valeur max correspond exactement à la maquette 1440 px,
+     puis la taille diminue progressivement jusqu'au mobile. */
+  --text-giant: clamp(4.25rem, calc((100vw - 2rem) / 4.6), 13.25rem);   /* 212 — « Bambou » */
+  --text-contact: clamp(4rem, 15.3vw, 13.75rem);      /* 220 — « Contact » */
+  --text-h1-projets: clamp(3.6rem, 13.2vw, 11.875rem);/* 190 */
+  --text-h1-about: clamp(3.4rem, 10.42vw, 9.375rem);  /* 150 */
+  --text-h1-project: clamp(2.6rem, 9.45vw, 8.5rem);   /* 136 */
+  --text-h2-xl: clamp(3rem, 8.34vw, 7.5rem);          /* 120 */
+  --text-h2: clamp(2.6rem, 7.64vw, 6.875rem);         /* 110 */
+  --text-sub-name: clamp(1.95rem, calc((100vw - 2rem) / 8.2), 6.625rem);  /* 106 — « Franceschini » */
+  --text-h2-sm: clamp(2.2rem, 6.67vw, 6rem);          /* 96 */
+  --text-h2-xs: clamp(2rem, 5vw, 4.5rem);             /* 72 */
+  --text-channel: clamp(3.75rem, 8.34vw, 7.5rem);     /* 120 — « CH 01 » */
+  --text-h3-xl: clamp(1.9rem, 3.62vw, 3.25rem);       /* 52 */
+  --text-h3-lg: clamp(1.75rem, 3.34vw, 3rem);         /* 48 */
+  --text-h3-md: clamp(1.6rem, 2.8vw, 2.5rem);         /* 40 */
+  --text-lead: clamp(1.25rem, 1.95vw, 1.75rem);       /* 28 */
+  --text-lead-sm: clamp(1.2rem, 1.81vw, 1.625rem);    /* 26 */
+  --text-body: clamp(1.0625rem, 0.95rem + 0.32vw, 1.25rem); /* 20 → 17 */
+  --text-vt-lg: clamp(1.5rem, 2.1vw, 1.875rem);       /* 30 VT323 */
+
+  /* --- Animations --- */
+  --animate-marquee: marquee 32s linear infinite;
+  --animate-jit: jit 4s infinite;
+  --animate-flick: flick 5s infinite;
+  --animate-roll: roll 7s linear infinite;
+  --animate-blink: blink 1s steps(1) infinite;
+  --animate-band: band 3.2s steps(1) infinite;
+}
+
+@keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+@keyframes jit { 0%, 88%, 100% { transform: translate(0, 0) } 89% { transform: translate(4px, 0) } 91% { transform: translate(-3px, 1px) } 93% { transform: translate(2px, 0) } 95% { transform: translate(0, 0) } }
+@keyframes flick { 0%, 100% { opacity: .9 } 50% { opacity: 1 } 52% { opacity: .82 } 54% { opacity: 1 } }
+@keyframes roll { from { transform: translateY(-100%) } to { transform: translateY(100vh) } }
+@keyframes blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+@keyframes band { 0%, 100% { transform: translateX(0) } 20% { transform: translateX(-24px) } 40% { transform: translateX(14px) } 60% { transform: translateX(-6px) } 80% { transform: translateX(30px) } }
+
+/* --- Aberration chromatique : chroma-2, chroma-4, chroma-6… --- */
+@utility chroma-* {
+  --chroma: calc(--value(integer) * 1px);
+  text-shadow: calc(var(--chroma) * -1) 0 var(--color-cyan), var(--chroma) 0 var(--color-magenta);
+}
+/* Version « phosphore vert » des numéros de chaîne */
+@utility glow-green {
+  text-shadow: -3px 0 var(--color-cyan), 3px 0 var(--color-magenta), 0 0 24px rgb(140 191 111 / .5);
+}
+/* Lignes de balayage */
+@utility scanlines {
+  background: repeating-linear-gradient(180deg, rgb(0 0 0 / var(--scan, .22)) 0 1px, transparent 1px 3px);
+}
+@utility vignette {
+  background: radial-gradient(ellipse at center, transparent 55%, rgb(29 11 12 / .6));
+}
+/* Barre de titre rayée des fenêtres « ordinateur rétro » */
+@utility win-stripes {
+  background: repeating-linear-gradient(180deg, var(--color-ink) 0 2px, var(--bar, var(--color-cream)) 2px 5px);
+}
+/* Contour de chiffres (étapes de la démarche) */
+@utility stroke-ink {
+  -webkit-text-stroke: 2px var(--color-ink);
+}
+
+@layer base {
+  html {
+    background: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    scroll-padding-top: 6rem;
+  }
+  body {
+    margin: 0;
+    background: var(--color-ink);
+    color: var(--color-cream);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.5;
+    overflow-x: clip;
+  }
+  h1, h2, h3 { font-weight: 400; }
+  p { text-wrap: pretty; }
+  a { color: inherit; }
+  :focus-visible {
+    outline: 3px solid var(--color-magenta);
+    outline-offset: 3px;
+  }
+  /* Les mouvements sont coupés pour les personnes qui le demandent */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Boutons rétro à ombre franche. Les variantes de couleur sont
+     données par les classes Tailwind ; ici on gère les états. */
+  .btn-retro {
+    display: inline-flex;
+    align-items: center;
+    gap: .625rem;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: var(--sh-x, 5px) var(--sh-y, 5px) 0 var(--sh, var(--color-ink));
+    transition: transform .08s, box-shadow .08s;
+  }
+  @media (hover: hover) {
+    .btn-retro:hover {
+      text-shadow: -2px 0 var(--color-cyan), 2px 0 var(--color-magenta);
+      transform: translate(-2px, -2px);
+      box-shadow: calc(var(--sh-x, 5px) + 2px) calc(var(--sh-y, 5px) + 2px) 0 var(--sh-hover, var(--sh, var(--color-ink)));
+    }
+  }
+  .btn-retro:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 var(--sh, var(--color-ink));
+  }
+  .btn-retro .vt { font-family: var(--font-vt); font-weight: 400; font-size: 1.2em; line-height: 1; }
+
+  /* Touche de télécommande (navigation) */
+  .remote-key {
+    box-shadow: 0 4px 0 #000;
+    transition: transform .08s, box-shadow .08s;
+  }
+  @media (hover: hover) {
+    .remote-key:hover { text-shadow: -2px 0 var(--color-cyan), 2px 0 var(--color-magenta); transform: translateY(-1px); }
+  }
+  .remote-key:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; }
+
+  /* Lien texte avec effet chromatique au survol */
+  @media (hover: hover) {
+    .chroma-hover:hover { text-shadow: -2px 0 var(--color-cyan), 2px 0 var(--color-magenta); }
+  }
+}
+
+/* Image de marbre (signal brouillé) utilisée en fond de plusieurs héros */
+.bg-marble { background: url(/textures/marble.png) center / cover; }
