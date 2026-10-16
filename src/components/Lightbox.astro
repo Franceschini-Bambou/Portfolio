@@ -20,8 +20,9 @@
     </div>
 
     <!-- l'image ou la vidéo, la plus grande possible sans être coupée -->
-    <div data-lb-stage class="relative flex min-h-0 flex-1 items-center justify-center p-3 sm:p-6">
-      <img data-lb-img alt="" hidden class="block size-full object-contain" />
+    <!-- data-scroll : image très haute (page web), on la fait défiler au lieu de la rapetisser -->
+    <div data-lb-stage class="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden p-3 sm:p-6 data-scroll:block data-scroll:overflow-y-auto">
+      <img data-lb-img alt="" hidden class="block size-full object-contain in-data-scroll:mx-auto in-data-scroll:h-auto in-data-scroll:max-w-[1100px]" />
       <video data-lb-video hidden controls playsinline preload="metadata" class="block size-full bg-black object-contain"></video>
     </div>
 

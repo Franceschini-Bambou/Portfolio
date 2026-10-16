@@ -9,7 +9,7 @@ import Eyebrow from '../../components/Eyebrow.astro';
 import Img from '../../components/Img.astro';
 import Lightbox from '../../components/Lightbox.astro';
 import { getContent, neighbours, type Project } from '../../lib/data';
-import { mediaUrl, fullUrl } from '../../lib/media';
+import { mediaUrl, fullUrl, fit } from '../../lib/media';
 
 export async function getStaticPaths() {
   const { projects } = await getContent();
@@ -24,6 +24,9 @@ const posterUrl = await mediaUrl(pj.videoPoster ?? pj.hero, 1600);
 const pad = (n: number) => String(n).padStart(2, '0');
 // versions nettes (taille d'origine) pour la loupe
 const galleryFull = await Promise.all(pj.gallery.map((g) => fullUrl(g.src)));
+// Une image « très haute » (capture d'une page web entière, post long…) : on en montre
+// le haut, comme dans une fenêtre de navigateur, et la loupe permet de la faire défiler.
+const galleryTall = await Promise.all(pj.gallery.map(async (g) => { const { width, height } = await fit(g.src); return height / width > 1.6; }));
 const heroFull = await fullUrl(pj.hero);
 const posterFull = await fullUrl(pj.videoPoster ?? pj.hero);
 // Nom de la galerie, réglable dans PocketBase (champ gallery_title) :
@@ -75,15 +78,16 @@ const links = [
           </Window>
         </div>
 
-        {hasGallery ? (
+        {/* Télé du haut : l'image « hero » si elle existe, sinon le carrousel de la galerie */}
+        {hasGallery && !pj.hero ? (
           <Window title={`${galleryWord}.tv`} bg="var(--color-rose)" class="shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]"
             data-carousel data-index="0" data-ms="420" tabindex="0" aria-roledescription="carrousel" aria-label={pj.galleryTitle}>
             <div data-screen class="relative m-3 flex h-[clamp(380px,110vw,520px)] justify-center overflow-hidden border-[3px] border-ink bg-ink sm:m-3.5 lg:h-[520px]">
               {pj.gallery.map((g, i) => (
                 <div data-slide hidden={i !== 0} class="size-full">
-                  <button type="button" data-zoom data-zoom-group="galerie" data-type="image" data-full={galleryFull[i]} data-caption={`${galleryCode} ${g.num} — ${g.title}`}
+                  <button type="button" data-zoom data-zoom-group="galerie" data-type="image" data-full={galleryFull[i]} data-tall={galleryTall[i] ? '' : undefined} data-caption={`${galleryCode} ${g.num} — ${g.title}`}
                     class="group relative block size-full cursor-zoom-in" aria-label={`Agrandir : ${g.title}`}>
-                    <Img src={g.src} alt={g.title} width={1000} loading={i === 0 ? 'eager' : 'lazy'} class="block size-full object-contain" />
+                    <Img src={g.src} alt={g.title} width={1000} loading={i === 0 ? 'eager' : 'lazy'} class:list={['block size-full', galleryTall[i] ? 'object-cover object-top' : 'object-contain']} />
                     <span class={zoomBadge} aria-hidden="true">⤢ AGRANDIR</span>
                   </button>
                 </div>
@@ -100,15 +104,15 @@ const links = [
             <p class="sr-only" aria-live="polite" data-live></p>
           </Window>
         ) : pj.hero ? (
-          <Window title="capture.vhs" bg="var(--color-rose)" class="shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]">
+          <Window title={hasVideo ? 'capture.vhs' : `${pj.slug}.jpg`} bg="var(--color-rose)" class="shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]">
             <div class="relative m-3 h-[clamp(280px,80vw,500px)] overflow-hidden border-[3px] border-ink bg-black sm:m-3.5 lg:h-[500px]">
-              <Img src={pj.hero} alt={`Capture de la vidéo ${pj.title}`} width={1200} loading="eager" class="absolute inset-0 size-full object-cover" />
+              <Img src={pj.hero} alt={hasVideo ? `Capture de la vidéo ${pj.title}` : pj.title} width={1200} loading="eager" class="absolute inset-0 size-full object-cover" />
               <div class="absolute inset-x-0 top-[62%] h-2.5 animate-[band_2.4s_steps(1)_infinite] bg-cover bg-center mix-blend-screen" style={`background-image:url(${heroUrl})`} aria-hidden="true"></div>
               <div class="scanlines pointer-events-none absolute inset-0 [--scan:.25]" aria-hidden="true"></div>
               <span class="absolute top-3.5 left-4 font-vt text-[30px] text-cream [text-shadow:2px_2px_0_#000]" aria-hidden="true">▶ PLAY</span>
               <span class="absolute right-4 bottom-3 font-vt text-[30px] text-cream [text-shadow:2px_2px_0_#000]" data-tc aria-hidden="true">SP 00:00:26</span>
-              <button type="button" data-zoom data-type="image" data-full={heroFull} data-caption={`Capture — ${pj.title}`}
-                class="group absolute inset-0 z-10 cursor-zoom-in" aria-label="Agrandir la capture">
+              <button type="button" data-zoom data-type="image" data-full={heroFull} data-caption={hasVideo ? `Capture — ${pj.title}` : pj.title}
+                class="group absolute inset-0 z-10 cursor-zoom-in" aria-label={hasVideo ? 'Agrandir la capture' : `Agrandir l'image de ${pj.title}`}>
                 <span class={zoomBadge.replace('right-2 bottom-2', 'right-3 top-3')} aria-hidden="true">⤢ AGRANDIR</span>
               </button>
             </div>
@@ -202,10 +206,10 @@ const links = [
           {pj.gallery.map((a) => (
             <li class="w-[78vw] max-w-[380px] shrink-0 snap-start md:w-auto md:max-w-none">
               <figure class="m-0 flex flex-col gap-4">
-                <button type="button" data-zoom data-zoom-group="galerie" data-type="image" data-full={galleryFull[pj.gallery.indexOf(a)]} data-caption={`${galleryCode} ${a.num} — ${a.title}`}
+                <button type="button" data-zoom data-zoom-group="galerie" data-type="image" data-full={galleryFull[pj.gallery.indexOf(a)]} data-tall={galleryTall[pj.gallery.indexOf(a)] ? '' : undefined} data-caption={`${galleryCode} ${a.num} — ${a.title}`}
                   class="group relative block w-full cursor-zoom-in border-[3px] border-cream bg-black text-left shadow-[10px_10px_0_var(--color-bordeaux)] transition-shadow hover:shadow-[-6px_0_0_var(--color-cyan),6px_0_0_var(--color-magenta)]"
                   aria-label={`Agrandir : ${a.title}`}>
-                  <Img src={a.src} alt={a.title} width={900} class="block h-auto w-full" />
+                  <Img src={a.src} alt={a.title} width={900} class:list={['block w-full', galleryTall[pj.gallery.indexOf(a)] ? 'aspect-[4/5] object-cover object-top' : 'h-auto']} />
                   <span class={zoomBadge} aria-hidden="true">⤢ AGRANDIR</span>
                 </button>
                 <figcaption class="flex items-baseline gap-3"><span class="font-vt text-[26px] text-rose">{galleryCode} {a.num}</span><span class="font-display text-[20px] leading-[1.15] sm:text-[22px]">{a.title}</span></figcaption>

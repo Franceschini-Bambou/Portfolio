@@ -225,6 +225,10 @@ function lbShow(i: number) {
     img.src = item.dataset.full!;
     img.alt = item.dataset.caption || '';
   }
+  // image très haute (capture de page web) : on la fait défiler en largeur réelle
+  const stage = dlg.querySelector<HTMLElement>('[data-lb-stage]')!;
+  stage.toggleAttribute('data-scroll', !isVideo && item.hasAttribute('data-tall'));
+  stage.scrollTop = 0;
   dlg.querySelector('[data-lb-caption]')!.textContent = item.dataset.caption || '';
   const several = lbItems.length > 1;
   dlg.querySelector('[data-lb-counter]')!.textContent = several ? `${pad2(lbIndex + 1)} / ${pad2(lbItems.length)}` : isVideo ? 'LECTURE' : 'ZOOM';
