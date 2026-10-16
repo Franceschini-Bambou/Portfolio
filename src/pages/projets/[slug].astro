@@ -26,6 +26,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const galleryFull = await Promise.all(pj.gallery.map((g) => fullUrl(g.src)));
 const heroFull = await fullUrl(pj.hero);
 const posterFull = await fullUrl(pj.videoPoster ?? pj.hero);
+// Nom de la galerie, réglable dans PocketBase (champ gallery_title) :
+// « Les affiches » → fenêtre affiches.tv et numéros AFF 01… ; « Les visuels » → visuels.tv et VIS 01…
+const galleryWord = pj.galleryTitle.split(/\s+/).pop()!.toLowerCase().normalize('NFD').replace(/[^a-z]/g, '') || 'images';
+const galleryCode = galleryWord.slice(0, 3).toUpperCase();
 const zoomBadge = 'pointer-events-none absolute right-2 bottom-2 z-10 bg-ink px-2 pt-1 pb-0.5 font-vt text-[20px] leading-none text-cream transition-opacity [@media(hover:hover)]:opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100';
 const steps = pj.steps.map((text, i) => ({ text, n: pad(i + 1), file: `etape_${pad(i + 1)}.txt` }));
 const hasGallery = pj.gallery.length > 0;
@@ -72,26 +76,26 @@ const links = [
         </div>
 
         {hasGallery ? (
-          <Window title="affiches.tv" bg="var(--color-rose)" class="shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]"
-            data-carousel data-index="0" data-ms="420" tabindex="0" aria-roledescription="carrousel" aria-label="Les affiches">
+          <Window title={`${galleryWord}.tv`} bg="var(--color-rose)" class="shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]"
+            data-carousel data-index="0" data-ms="420" tabindex="0" aria-roledescription="carrousel" aria-label={pj.galleryTitle}>
             <div data-screen class="relative m-3 flex h-[clamp(380px,110vw,520px)] justify-center overflow-hidden border-[3px] border-ink bg-ink sm:m-3.5 lg:h-[520px]">
               {pj.gallery.map((g, i) => (
-                <div data-slide hidden={i !== 0} class="h-full">
-                  <button type="button" data-zoom data-zoom-group="affiches" data-type="image" data-full={galleryFull[i]} data-caption={`AFF ${g.num} — ${g.title}`}
-                    class="group relative block h-full cursor-zoom-in" aria-label={`Agrandir l'affiche ${g.title}`}>
-                    <Img src={g.src} alt={g.title} width={1000} loading={i === 0 ? 'eager' : 'lazy'} class="block h-full w-auto object-contain" />
+                <div data-slide hidden={i !== 0} class="size-full">
+                  <button type="button" data-zoom data-zoom-group="galerie" data-type="image" data-full={galleryFull[i]} data-caption={`${galleryCode} ${g.num} — ${g.title}`}
+                    class="group relative block size-full cursor-zoom-in" aria-label={`Agrandir : ${g.title}`}>
+                    <Img src={g.src} alt={g.title} width={1000} loading={i === 0 ? 'eager' : 'lazy'} class="block size-full object-contain" />
                     <span class={zoomBadge} aria-hidden="true">⤢ AGRANDIR</span>
                   </button>
                 </div>
               ))}
               <div class="scanlines pointer-events-none absolute inset-0 [--scan:.2]" aria-hidden="true"></div>
-              <span class="absolute top-3 left-4 font-vt text-[30px] text-cream [text-shadow:2px_2px_0_#000]" aria-hidden="true">AFF <span data-label={JSON.stringify(pj.gallery.map((g) => g.num))}>{pj.gallery[0].num}</span></span>
+              <span class="absolute top-3 left-4 font-vt text-[30px] text-cream [text-shadow:2px_2px_0_#000]" aria-hidden="true">{galleryCode} <span data-label={JSON.stringify(pj.gallery.map((g) => g.num))}>{pj.gallery[0].num}</span></span>
               <canvas data-noise width="200" height="120" class="pointer-events-none absolute inset-0 size-full opacity-0 [image-rendering:pixelated]" aria-hidden="true"></canvas>
             </div>
             <div class="flex items-center justify-between gap-3 px-3 pb-3.5 sm:px-3.5">
-              <button type="button" data-prev class="btn-retro border-[3px] border-ink bg-cream px-[18px] py-2 font-vt text-[28px] font-normal leading-none text-ink [--sh-x:4px] [--sh-y:4px] hover:bg-bordeaux hover:text-cream" aria-label="Affiche précédente">CH −</button>
+              <button type="button" data-prev class="btn-retro border-[3px] border-ink bg-cream px-[18px] py-2 font-vt text-[28px] font-normal leading-none text-ink [--sh-x:4px] [--sh-y:4px] hover:bg-bordeaux hover:text-cream" aria-label="Image précédente">CH −</button>
               <span class="text-center font-display text-[18px] leading-[1.1] sm:text-[22px]" data-label={JSON.stringify(pj.gallery.map((g) => g.title))}>{pj.gallery[0].title}</span>
-              <button type="button" data-next class="btn-retro border-[3px] border-ink bg-cream px-[18px] py-2 font-vt text-[28px] font-normal leading-none text-ink [--sh-x:4px] [--sh-y:4px] hover:bg-bordeaux hover:text-cream" aria-label="Affiche suivante">CH +</button>
+              <button type="button" data-next class="btn-retro border-[3px] border-ink bg-cream px-[18px] py-2 font-vt text-[28px] font-normal leading-none text-ink [--sh-x:4px] [--sh-y:4px] hover:bg-bordeaux hover:text-cream" aria-label="Image suivante">CH +</button>
             </div>
             <p class="sr-only" aria-live="polite" data-live></p>
           </Window>
@@ -185,26 +189,26 @@ const links = [
     </section>
   )}
 
-  <!-- Les affiches -->
+  <!-- Galerie (« Les affiches », « Les visuels »…) -->
   {hasGallery && (
     <section class="bg-ink text-cream">
       <div class="mx-auto flex max-w-[1440px] flex-col gap-10 py-20 lg:gap-11 lg:py-[110px]">
         <div class="flex flex-col gap-4 px-4 sm:px-6 lg:gap-[18px] lg:px-14">
           <Eyebrow class="text-rose">(04) — La série</Eyebrow>
-          <h2 class="m-0 font-display text-h2 leading-[.9] chroma-3 sm:chroma-5">Les affiches</h2>
+          <h2 class="m-0 font-display text-h2 leading-[.9] chroma-3 sm:chroma-5">{pj.galleryTitle}</h2>
           <p class="m-0 font-vt text-[22px] text-rose md:hidden" aria-hidden="true">◀ GLISSER ▶</p>
         </div>
         <ul class="relative m-0 flex list-none snap-x snap-mandatory gap-6 overflow-x-auto scroll-px-4 px-4 pb-6 [scrollbar-width:none] sm:scroll-px-6 sm:px-6 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:pb-0 lg:px-14" role="list">
           {pj.gallery.map((a) => (
             <li class="w-[78vw] max-w-[380px] shrink-0 snap-start md:w-auto md:max-w-none">
               <figure class="m-0 flex flex-col gap-4">
-                <button type="button" data-zoom data-zoom-group="affiches" data-type="image" data-full={galleryFull[pj.gallery.indexOf(a)]} data-caption={`AFF ${a.num} — ${a.title}`}
+                <button type="button" data-zoom data-zoom-group="galerie" data-type="image" data-full={galleryFull[pj.gallery.indexOf(a)]} data-caption={`${galleryCode} ${a.num} — ${a.title}`}
                   class="group relative block w-full cursor-zoom-in border-[3px] border-cream bg-black text-left shadow-[10px_10px_0_var(--color-bordeaux)] transition-shadow hover:shadow-[-6px_0_0_var(--color-cyan),6px_0_0_var(--color-magenta)]"
-                  aria-label={`Agrandir l'affiche ${a.title}`}>
+                  aria-label={`Agrandir : ${a.title}`}>
                   <Img src={a.src} alt={a.title} width={900} class="block h-auto w-full" />
                   <span class={zoomBadge} aria-hidden="true">⤢ AGRANDIR</span>
                 </button>
-                <figcaption class="flex items-baseline gap-3"><span class="font-vt text-[26px] text-rose">AFF {a.num}</span><span class="font-display text-[20px] leading-[1.15] sm:text-[22px]">{a.title}</span></figcaption>
+                <figcaption class="flex items-baseline gap-3"><span class="font-vt text-[26px] text-rose">{galleryCode} {a.num}</span><span class="font-display text-[20px] leading-[1.15] sm:text-[22px]">{a.title}</span></figcaption>
               </figure>
             </li>
           ))}

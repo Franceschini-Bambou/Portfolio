@@ -26,6 +26,8 @@ export interface Project {
   video?: string;
   videoPoster?: Media;
   gallery: { src: Media; title: string; num: string }[];
+  /** titre de la galerie (« Les affiches », « Les visuels »…) */
+  galleryTitle: string;
   context: string;
   problem: string;
   steps: string[];
@@ -77,6 +79,7 @@ async function fromPocketBase(url: string): Promise<Content> {
       thumbnails: (p.thumbnails ?? []).map((n: string) => file(p, n)),
       hero: file(p, p.hero), video: file(p, p.video), videoPoster: file(p, p.video_poster),
       gallery: (p.gallery ?? []).map((n: string, j: number) => ({ src: file(p, n)!, title: p.gallery_titles?.[j] ?? '', num: pad(j + 1) })),
+      galleryTitle: (p.gallery_title ?? '').trim() || 'Les affiches',
       context: p.context ?? '', problem: p.problem ?? '', steps: p.steps ?? [], result: p.result ?? '', role: p.role ?? '',
       hasPage: !!p.has_page,
     })),
