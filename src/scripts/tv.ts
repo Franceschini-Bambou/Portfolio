@@ -243,6 +243,7 @@ function lbOpen(trigger: HTMLElement) {
   lbItems = all.filter((el, i) => all.findIndex((o) => o.dataset.full === el.dataset.full) === i);
   lbShow(Math.max(0, lbItems.findIndex((el) => el.dataset.full === trigger.dataset.full)));
   dlg.showModal();
+  document.dispatchEvent(new Event('lightbox:open'));
 }
 function lbClose() { lightbox()?.close(); }
 
@@ -268,6 +269,7 @@ document.addEventListener('close', (e) => {
   if (!dlg.matches?.('dialog[data-lightbox]')) return;
   const video = dlg.querySelector<HTMLVideoElement>('[data-lb-video]');
   if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
+  document.dispatchEvent(new Event('lightbox:close'));
 }, true);
 // swipe dans la loupe sur mobile
 let lbTouchX = 0;
