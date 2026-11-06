@@ -8,7 +8,7 @@ Portfolio en forme de **chaîne de télé des années 80** : chaque page est une
 | **Tailwind CSS 4** | toute la mise en forme (classes utilitaires, mobile d'abord) |
 | **PocketBase** | base de données : projets, textes, images, vidéo, CV et messages du formulaire |
 | **Git / GitHub** | versions du code, plus le déploiement automatique (GitHub Actions) |
-| **Infomaniak** | hébergement du site (dossier `dist/` envoyé en FTP) |
+| **VPS de l'IUT** | hébergement du site et de PocketBase (Apache, HTTPS) · le nom de domaine reste chez Infomaniak |
 
 ---
 
@@ -23,8 +23,9 @@ Portfolio en forme de **chaîne de télé des années 80** : chaque page est une
 7. [Les animations et l'interactivité](#7-les-animations-et-linteractivité)
 8. [PocketBase pas à pas](#8-pocketbase-pas-à-pas)
 9. [Git et GitHub](#9-git-et-github)
-10. [Mettre en ligne sur Infomaniak](#10-mettre-en-ligne-sur-infomaniak)
+10. [Mettre en ligne sur le VPS](#10-mettre-en-ligne-sur-le-vps)
 11. [À faire avant la mise en ligne](#11-à-faire-avant-la-mise-en-ligne-)
+12. [La version anglaise](#12-la-version-anglaise)
 
 ---
 
@@ -60,12 +61,15 @@ canal-bf/
 │  ├─ styles/global.css    ⭐ le design system : couleurs, polices, tailles, effets télé
 │  ├─ layouts/Base.astro   squelette commun à toutes les pages (head, en-tête, pied, télé)
 │  ├─ components/          morceaux réutilisables (fenêtre rétro, bouton, guide des programmes…)
-│  ├─ pages/               1 fichier = 1 page du site (le nom du fichier = l'adresse)
+│  ├─ pages/               1 fichier = 1 adresse du site (pages/en/ = version anglaise)
+│  ├─ views/               ⭐ le contenu de chaque page, commun au français et à l'anglais
+│  ├─ i18n/ui.ts           ⭐ tous les textes fixes du site, en français et en anglais
 │  ├─ scripts/tv.ts        toute l'interactivité (zapping, menu, filtres, carrousels, formulaire)
 │  └─ lib/data.ts          lit tout le contenu dans PocketBase
 ├─ pb_migrations/          crée les collections PocketBase automatiquement
 ├─ pb_hooks/               t'envoie un e-mail à chaque nouveau message
-└─ .github/workflows/      déploiement automatique sur Infomaniak
+├─ deploy/                 configuration du serveur (service PocketBase, sites Apache)
+└─ .github/workflows/      déploiement automatique sur le VPS
 ```
 
 **Adresses générées :**
@@ -78,7 +82,10 @@ canal-bf/
 | `pages/a-propos.astro` | `/a-propos/` | CH 03 |
 | `pages/contact.astro` | `/contact/` | CH 04 |
 | `pages/mentions-legales.astro`, `politique-de-confidentialite.astro` | pages légales | — |
-| `pages/404.astro` | page d'erreur « Pas de signal » | — |
+| `pages/404.astro` | page d'erreur « Pas de signal » (bilingue) | — |
+| `pages/en/…` | `/en/`, `/en/projects/`, `/en/projects/olyvia/`, `/en/about/`, `/en/contact/`, `/en/legal-notice/`, `/en/privacy-policy/` | version anglaise |
+
+Les fichiers de `pages/` sont très courts : ils appellent la « vue » correspondante dans `src/views/` avec la langue (`<Home lang="fr" />`, `<Home lang="en" />`). **Pour modifier la mise en page d'une page, c'est dans `src/views/` que ça se passe** (les deux langues changent en même temps).
 
 ---
 
@@ -129,20 +136,20 @@ Tout est dans **`src/styles/global.css`**. Avec Tailwind 4, les variables décla
 
 ## 5. Page par page
 
-### CH 01 — Accueil (`src/pages/index.astro`)
+### CH 01 — Accueil (`src/views/Home.astro`)
 1. **Héros** : « ● EN DIRECT — CANAL BF », le grand **CH 01**, le nom **BAMBOU / FRANCESCHINI** qui tremble (`animate-jit`), puis 3 colonnes : *Design / Com*, la fenêtre `citation.txt` (Milton Glaser) et `stage.exe` avec le bouton « Me contacter ».
 2. **Bandeau « Ce soir sur Canal BF »** : les 3 projets avec leur horaire, cliquables. Les données viennent de PocketBase.
 3. **Marquee** des logiciels.
 4. **Qui suis-je ?** : texte, bouton « CH 03 En savoir plus » et `portrait.jpg` légèrement penché avec l'effet glitch.
 5. **Programme TV « Ce soir sur Canal BF »** : le guide des programmes.
 
-### CH 02 — Mes projets (`src/pages/projets/index.astro`)
-- Fond rose, titre **Mes projets**, filtres **Tous / Graphisme / Audiovisuel / Communication** avec le nombre de projets.
+### CH 02 — Mes projets (`src/views/Projects.astro`)
+- Fond rose, titre **Mes projets**, filtres **Tous / Design UI/UX / Audiovisuel / Développement web** avec le nombre de projets.
 - Cliquer sur un filtre déclenche une courte rafale de neige (380 ms), puis seuls les projets du genre restent affichés.
 - Les filtres et leurs compteurs sont calculés à partir de PocketBase : un nouveau projet y apparaît tout seul.
 
-### CH 02 — Page projet (`src/pages/projets/[slug].astro`)
-Un seul fichier fabrique **toutes** les pages projet (une par projet qui a « has_page » coché).
+### CH 02 — Page projet (`src/views/Project.astro`)
+`src/pages/projets/[slug].astro` (et `src/pages/en/projects/[slug].astro` en anglais) fabrique **toutes** les pages projet (une par projet qui a « has_page » coché).
 1. **Héros** : « ◀ Retour aux projets », CH 02 et l'horaire, le genre, le titre, la description et la fiche `fiche.txt` (type, année, outils).
    - **Si le projet a des affiches** (L'évolution du temps), elles défilent dans la télé `affiches.tv` : boutons CH − / CH +, swipe sur mobile, flèches du clavier.
    - **Sinon** (Pourquoi la danse ?), la capture apparaît dans la télé `capture.vhs`.
@@ -153,19 +160,19 @@ Un seul fichier fabrique **toutes** les pages projet (une par projet qui a « ha
 6. **(05) Résultat** et **Mon rôle** (`mon_role.txt`).
 7. **Émission précédente / suivante** : on passe d'un projet à l'autre, en boucle.
 
-### CH 03 — À propos (`src/pages/a-propos.astro`)
+### CH 03 — À propos (`src/views/About.astro`)
 1. **Héros** : « À propos », présentation et `bambou.jpg` en noir et blanc teinté rose.
 2. **(01) Compétences** : 6 cartes (1 colonne sur mobile, 2 sur tablette, 3 sur desktop).
 3. **(02) Mes inspirations créatives** : carrousel « zapping » à 4 chaînes (La mode, Les musées, La danse, Le BAFA), avec neige entre deux chaînes, boutons CH − / CH + et accès direct aux chaînes.
 4. **(03) Outils & technologies** : 4 fenêtres `creation.app`, `video.app`, `web.app` et `ia.app` (Claude, Gemini, Copilot).
 
-### CH 04 — Contact (`src/pages/contact.astro`)
+### CH 04 — Contact (`src/views/Contact.astro`)
 - `infos.txt` : e-mail, LinkedIn, Instagram, Behance, plus le bouton **Mon CV (PDF)**. Le bouton est grisé tant que le CV n'est pas ajouté dans PocketBase.
 - `stage.exe` : les dates de stage.
 - `message.exe` : le formulaire (nom, prénom, e-mail, message). L'envoi l'enregistre **dans PocketBase**, puis l'écran « ■ STOP — Message transmis » apparaît. Un champ invisible piège les robots, et PocketBase limite à 5 messages par 10 minutes par adresse IP.
 
 ### Pages légales et 404
-- `mentions-legales.astro` et `politique-de-confidentialite.astro` sont obligatoires en France, surtout avec un formulaire. **À relire** (partie 11).
+- `src/views/LegalNotice.astro` et `src/views/Privacy.astro` (les deux langues dans le même fichier) sont obligatoires en France, surtout avec un formulaire. **À relire** (partie 11).
 - `404.astro` : écran de neige « PAS DE SIGNAL ».
 
 ---
@@ -242,6 +249,7 @@ Champs utiles à connaître dans `projects` :
 - `sort` : l'ordre d'affichage (1, 2, 3…).
 - `tags`, `steps`, `gallery_titles` : des listes au format JSON, par exemple `["Figma", "Illustrator"]`.
 - `color` : la couleur de la chaîne, par exemple `#4F86A6`.
+- les champs qui finissent par `_en` : la version anglaise (partie 12).
 
 ### 8.3 Remplir le contenu
 Dans `.env`, mets l'adresse de PocketBase :
@@ -296,46 +304,31 @@ git push
 
 ---
 
-## 10. Mettre en ligne sur Infomaniak
+## 10. Mettre en ligne sur le VPS
 
-Le site a deux morceaux :
+Tout tourne sur le VPS de l'IUT (Debian, Apache, utilisateur `etudiant`, SSH sur le port 23039) :
 
-| Morceau | Où le mettre |
-|---|---|
-| **Le site** (`dist/`, des fichiers HTML, CSS et images) | ton **Hébergement Web Infomaniak**, dossier `web/` |
-| **PocketBase** (un programme qui tourne en continu) | un serveur qui peut faire tourner un programme : **VPS Infomaniak**, **Jelastic Cloud Infomaniak**, ou un hébergeur PocketBase comme **PocketHost** |
+| Morceau | Adresse | Sur le serveur |
+|---|---|---|
+| **PocketBase** (admin + contenu) | https://api.bambou-franceschini.fr (admin : `/_/`) | `/var/www/canal-bf-api/`, service `canal-bf-api` |
+| **Le site** (fichiers de `dist/`) | https://portfolio.bambou-franceschini.fr | `/var/www/portfolio/` |
 
-Un hébergement web mutualisé ne permet pas de laisser tourner PocketBase en continu. Il lui faut un vrai serveur, idéalement sur un sous-domaine comme `api.bamboufranceschini.fr`.
+Les fichiers de configuration sont dans `deploy/` : le service systemd (`canal-bf-api.service`) et les deux sites Apache (`api.conf`, `portfolio.conf`).
 
 ### 10.1 PocketBase en ligne
-1. Sur le serveur, envoie l'exécutable PocketBase (version Linux) ainsi que les dossiers `pb_migrations/` et `pb_hooks/`.
-2. Lance-le en limitant les sites autorisés à l'appeler :
-   ```bash
-   ./pocketbase serve api.bamboufranceschini.fr --origins=https://www.bamboufranceschini.fr
-   ```
-   Avec un nom de domaine, PocketBase crée tout seul le certificat HTTPS.
-3. Crée ton admin (`./pocketbase superuser upsert …`). Ensuite, transfère ton contenu : admin local → Settings → Backups → crée une sauvegarde et télécharge-la, puis restaure-la dans l'admin en ligne.
-4. Pense à **sauvegarder** `pb_data/` de temps en temps (admin → Settings → Backups).
+- Il écoute en interne sur le port 8090 ; Apache le rend public en HTTPS (certificat certbot).
+- `--origins` limite les sites qui peuvent l'appeler depuis un navigateur (le formulaire de contact).
+- Commandes utiles sur le serveur : `sudo systemctl status canal-bf-api`, `sudo systemctl restart canal-bf-api`, `journalctl -u canal-bf-api -n 50`.
+- **Sauvegarde** : admin en ligne → Settings → Backups → « Initialize new backup », puis télécharge-la de temps en temps.
+- Pour ajouter un projet avec une migration (dossier `pb_migrations/`) : envoie le fichier sur le serveur avec `scp -P 23039 pb_migrations/LE_FICHIER.js etudiant@185.157.244.202:/var/www/canal-bf-api/pb_migrations/`, puis `sudo systemctl restart canal-bf-api`.
 
 ### 10.2 Le site
-**Méthode simple (à la main) :**
-1. `npm run build` (avec `PUBLIC_PB_URL` = l'adresse en ligne de PocketBase).
-2. Ouvre FileZilla et connecte-toi en FTP à ton hébergement. Les identifiants se trouvent dans Manager Infomaniak → Hébergement → FTP / SSH.
-3. Envoie **le contenu** de `dist/` dans le dossier `web/`. Le fichier `.htaccess` est inclus : il gère la page 404 et le cache.
+Le fichier `.github/workflows/deploy.yml` construit le site avec le contenu de PocketBase en ligne et l'envoie sur le VPS à chaque `git push`. Secrets GitHub (Settings → Secrets and variables → Actions) : `PUBLIC_PB_URL`, `VPS_HOST`, `VPS_PORT`, `VPS_USER`, `VPS_SSH_KEY`.
 
-**Méthode automatique (GitHub Actions)** : le fichier `.github/workflows/deploy.yml` construit et envoie le site à chaque `git push`. Sur GitHub, ouvre **Settings → Secrets and variables → Actions → New repository secret** et ajoute :
+Le site est statique : **après une modification dans PocketBase**, va dans l'onglet **Actions → Déployer sur le VPS → Run workflow** pour le reconstruire.
 
-| Secret | Valeur |
-|---|---|
-| `PUBLIC_PB_URL` | `https://api.bamboufranceschini.fr` |
-| `FTP_SERVER` | le serveur FTP Infomaniak (ex. `xxxx.ftp.infomaniak.com`) |
-| `FTP_USERNAME` / `FTP_PASSWORD` | ton compte FTP |
-| `FTP_DIR` | `/web/` (ou le dossier de ton site) |
-
-Après avoir modifié du contenu dans PocketBase : onglet **Actions → Déployer sur Infomaniak → Run workflow**. Le site se met à jour tout seul.
-
-### 10.3 Nom de domaine
-Dans `astro.config.mjs`, remplace `site: 'https://www.bamboufranceschini.fr'` par ta vraie adresse. Elle sert aux liens de partage.
+### 10.3 Travailler en local avec le contenu en ligne
+Dans `.env`, mets `PUBLIC_PB_URL=https://api.bambou-franceschini.fr` : `npm run dev` affiche alors le vrai contenu. Remets `http://127.0.0.1:8090` pour tester avec ton PocketBase local.
 
 ---
 
@@ -348,3 +341,36 @@ Dans `astro.config.mjs`, remplace `site: 'https://www.bamboufranceschini.fr'` pa
 - [ ] **Vérifier tes liens** LinkedIn, Instagram et Behance (collection `site`).
 - [ ] Mettre la vraie adresse du site dans `astro.config.mjs`.
 - [ ] Configurer le SMTP pour recevoir les messages par e-mail (partie 8.5).
+
+---
+
+## 12. La version anglaise
+
+Le site existe en **français** (adresses habituelles) et en **anglais** (tout est sous `/en/`). Le bouton **FR | EN** de l'en-tête (et **EN / FR** à côté de MENU sur mobile, « English version » dans le pied de page) ouvre **la même page** dans l'autre langue.
+
+### Les textes fixes : `src/i18n/ui.ts`
+Titres, boutons, menus, écran de chargement, messages du formulaire… Tout est rangé deux fois dans ce fichier : une liste `fr` et une liste `en`, avec les **mêmes clés**. Pour changer un texte, modifie la ligne dans la bonne langue. Exemple :
+
+```ts
+'home.tagline': 'J’aime rendre les idées réalité',   // dans fr
+'home.tagline': 'I love bringing ideas to life',     // dans en
+```
+
+Si tu ajoutes une clé dans `fr` sans l'ajouter dans `en`, TypeScript te le signale.
+
+### Les contenus : les champs `_en` de PocketBase
+La migration `pb_migrations/1700000003_english_fields.js` ajoute un champ anglais à côté de chaque texte, **et le remplit avec une première traduction** :
+
+| Collection | Champs anglais |
+|---|---|
+| `projects` | `title_en`, `description_en`, `tags_en`, `context_en`, `problem_en`, `steps_en`, `result_en`, `role_en`, `gallery_title_en`, `gallery_titles_en` |
+| `skills` | `title_en`, `description_en` |
+| `inspirations` | `name_en` |
+| `tools` | `name_en` |
+| `site` | `stage_en`, `cv_en` (ton CV en anglais, facultatif) |
+
+- **Un champ `_en` vide → le site anglais affiche le texte français.** Par exemple, `title_en` est vide pour Olyvia! car c'est un nom de marque.
+- La migration ne remplit que les champs **vides** : tes corrections ne sont jamais écrasées.
+- Quand tu ajoutes un nouveau projet, pense à remplir aussi ses champs `_en`.
+- Le genre (Audiovisuel, Design UI/UX, Développement web) reste en français dans PocketBase : le site le traduit tout seul (Audiovisual, UI/UX design, Web development). L'écriture exacte importe peu (« Developpement Web » marche aussi), et les anciens noms Graphisme et Communication sont encore reconnus.
+

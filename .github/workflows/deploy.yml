@@ -1,0 +1,46 @@
+# ==========================================================
+# DÉPLOIEMENT AUTOMATIQUE SUR INFOMANIAK
+# À chaque « git push » sur main (ou en cliquant « Run workflow »
+# dans l'onglet Actions de GitHub après avoir modifié PocketBase),
+# GitHub construit le site et l'envoie en FTP sur Infomaniak.
+# Les secrets se règlent dans GitHub → Settings → Secrets and
+# variables → Actions (voir le README, étape 6).
+# ==========================================================
+name: Déployer sur Infomaniak
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    # ne se lance que quand la mise en ligne est configurée :
+    # GitHub → Settings → Secrets and variables → Actions → onglet Variables
+    # → New repository variable : DEPLOY_ENABLED = true
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Construire le site (contenu lu dans PocketBase)
+        run: npm run build
+        env:
+          PUBLIC_PB_URL: ${{ secrets.PUBLIC_PB_URL }}
+
+      - name: Envoyer dist/ sur Infomaniak (FTP)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./dist/
+          server-dir: ${{ secrets.FTP_DIR }}

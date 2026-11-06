@@ -1,0 +1,13 @@
+---
+// Project page (EN): same address as in French, under /en/projects/.
+// Le contenu est dans src/views/Project.astro
+// (after adding a project in PocketBase, restart `npm run dev` if the page 404s)
+import Project from '../../../views/Project.astro';
+import { getContent } from '../../../lib/data';
+
+export async function getStaticPaths() {
+  const { projects } = await getContent('en');
+  return projects.filter((p) => p.hasPage).map((p) => ({ params: { slug: p.slug }, props: { project: p } }));
+}
+---
+<Project project={Astro.props.project} lang="en" />

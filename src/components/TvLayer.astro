@@ -4,6 +4,8 @@
 // arrondi de l'écran, compteur ▶ PLAY et écran de neige du zapping.
 // transition:persist → ces éléments ne sont pas recréés d'une page à
 // l'autre (les animations continuent sans à-coup).
+import { langOf, useT } from '../i18n/ui';
+const t = useT(langOf(Astro.url.pathname));
 ---
 <div transition:persist="tv-layer" aria-hidden="true">
   <!-- OSD fixe en bas à gauche -->
@@ -22,7 +24,7 @@
     <canvas width="320" height="180" class="block size-full [image-rendering:pixelated]"></canvas>
     <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 px-4 text-center">
       <span data-snow-ch class="font-vt text-[84px] leading-[.8] text-ch-green [text-shadow:3px_3px_0_#000,-3px_0_#2EE6D6,3px_0_#FF2E88] sm:text-[120px]">CH 01</span>
-      <span class="bg-ink px-5 py-1.5 font-vt text-[30px] text-cream chroma-2 sm:text-[44px]">RECHERCHE DU SIGNAL…</span>
+      <span data-snow-msg class="bg-ink px-5 py-1.5 font-vt text-[30px] text-cream chroma-2 sm:text-[44px]">{t('snow.searching')}</span>
     </div>
   </div>
 </div>

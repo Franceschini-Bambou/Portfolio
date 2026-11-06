@@ -3,16 +3,11 @@
 // ----------------------------------------------------------
 // Le pourcentage suit le vrai chargement : polices, images visibles
 // en haut de page, puis la fin du chargement de la page. Il dure au
-// moins 2,2 s (pour qu'on ait le temps de le voir) et au plus 8 s.
+// moins 2,2 s (pour qu'on ait le temps de le voir) et au plus 6 s.
 // ==========================================================
+// Les textes (français ou anglais) sont écrits dans BootScreen.astro (attributs data-…).
 const MIN_MS = 2200;
-const MAX_MS = 8000;
-const messages = [
-  "Réglage de l'antenne…",
-  'Calibrage des couleurs…',
-  'Chargement des émissions…',
-  'Préparation du direct…',
-];
+const MAX_MS = 6000;
 
 const boot = document.getElementById('boot');
 
@@ -24,13 +19,17 @@ function run(boot: HTMLElement) {
   const pct = $('[data-boot-pct]'), freq = $('[data-boot-freq]'), msg = $('[data-boot-msg]');
   const needle = $('[data-boot-needle]'), segs = $$('[data-boot-seg]'), chans = $$('[data-boot-ch]'), bars = $$('[data-boot-bar]');
   const noise = $<HTMLCanvasElement>('[data-boot-noise]');
+  const messages: string[] = JSON.parse(boot.dataset.msgs || '[]');
 
   /* ---- ce qu'on attend vraiment ---- */
   let total = 0, done = 0;
   const wait = (p: Promise<unknown>) => { total++; p.finally(() => done++); };
   wait(document.fonts?.ready ?? Promise.resolve());
   document.querySelectorAll<HTMLImageElement>('main img').forEach((img) => {
-    if (img.getBoundingClientRect().top > innerHeight * 1.2) return; // seulement le haut de page
+    const r = img.getBoundingClientRect();
+    // seulement les images affichées en haut de page (une image cachée, comme
+    // les autres chaînes d'un carrousel, ne se charge jamais : on ne l'attend pas)
+    if (r.height === 0 || r.top > innerHeight * 1.2) return;
     if (img.complete) return;
     wait(new Promise((r) => { img.addEventListener('load', r, { once: true }); img.addEventListener('error', r, { once: true }); }));
   });
@@ -52,11 +51,11 @@ function run(boot: HTMLElement) {
       if (found.has(i) || p < ((i + 1) / chans.length) * 100 - 6) return;
       found.add(i);
       c.style.color = '#FBF5EC';
-      c.querySelector('[data-boot-state]')!.textContent = '✓ TROUVÉE';
+      c.querySelector('[data-boot-state]')!.textContent = boot.dataset.found || '✓';
       (c.querySelector('[data-boot-state]') as HTMLElement).style.color = '#8CBF6F';
     });
     const m = Math.min(messages.length - 1, Math.floor((p / 100) * messages.length));
-    if (m !== lastMsg) { lastMsg = m; msg.textContent = messages[m]; }
+    if (m !== lastMsg && messages[m]) { lastMsg = m; msg.textContent = messages[m]; }
   }
 
   function tick(now: number) {
@@ -78,7 +77,7 @@ function run(boot: HTMLElement) {
   /* ---- fin : signal trouvé → décrochage vers le haut ---- */
   async function finish(fast = false) {
     finished = true;
-    msg.textContent = '▶ Début des programmes';
+    msg.textContent = boot.dataset.start || '▶';
     msg.style.color = '#8CBF6F';
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     if (!fast) await sleep(450);

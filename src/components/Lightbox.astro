@@ -5,9 +5,12 @@
 // Pour rendre un élément « zoomable », on lui met :
 //   data-zoom  data-full="URL"  data-type="image|video"
 //   data-caption="Légende"  data-zoom-group="nom du groupe" (navigation ◀ ▶)
-// Le fonctionnement est dans src/scripts/tv.ts (bloc 9).
+// Le fonctionnement est dans src/scripts/tv.ts (bloc 7).
+import { langOf, useT } from '../i18n/ui';
+const lang = langOf(Astro.url.pathname);
+const t = useT(lang);
 ---
-<dialog data-lightbox aria-label="Agrandissement"
+<dialog data-lightbox aria-label={t('lb.aria')} data-play={t('lb.play')} data-zoom-label={t('lb.zoom')}
   class="fixed inset-0 m-0 size-full max-h-none max-w-none overflow-hidden bg-ink p-0 text-cream backdrop:bg-black">
   <div class="flex h-full flex-col">
     <!-- barre du haut -->
@@ -15,7 +18,7 @@
       <span class="font-vt text-[22px] leading-none text-rose sm:text-[26px]"><span class="text-magenta" aria-hidden="true">● </span><span data-lb-counter></span></span>
       <button type="button" data-lb-close
         class="btn-retro border-[3px] border-cream bg-cream px-4 py-1.5 font-vt text-[24px] font-normal leading-none text-ink [--sh:#000] [--sh-x:4px] [--sh-y:4px] hover:bg-bordeaux hover:text-cream">
-        ✕ FERMER
+        {t('lb.close')}
       </button>
     </div>
 
@@ -28,10 +31,10 @@
 
     <!-- barre du bas : légende + navigation -->
     <div class="flex items-center justify-between gap-3 border-t-[3px] border-bordeaux px-4 py-3 sm:px-6">
-      <button type="button" data-lb-prev aria-label="Image précédente"
+      <button type="button" data-lb-prev aria-label={t('lb.prev')}
         class="btn-retro border-[3px] border-cream bg-transparent px-4 py-1.5 font-vt text-[26px] font-normal leading-none text-cream [--sh:#000] [--sh-x:4px] [--sh-y:4px] hover:bg-bordeaux">◀ CH −</button>
       <p data-lb-caption class="m-0 flex-1 text-center font-display text-[16px] leading-[1.15] sm:text-[22px]"></p>
-      <button type="button" data-lb-next aria-label="Image suivante"
+      <button type="button" data-lb-next aria-label={t('lb.next')}
         class="btn-retro border-[3px] border-cream bg-transparent px-4 py-1.5 font-vt text-[26px] font-normal leading-none text-cream [--sh:#000] [--sh-x:4px] [--sh-y:4px] hover:bg-bordeaux">CH + ▶</button>
     </div>
   </div>

@@ -107,7 +107,10 @@
     background: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     scroll-padding-top: 6rem;
+    /* barre de défilement du navigateur masquée (on défile toujours à la molette, au clavier ou au doigt) */
+    scrollbar-width: none;
   }
+  html::-webkit-scrollbar { display: none; }
   body {
     margin: 0;
     background: var(--color-ink);

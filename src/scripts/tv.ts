@@ -6,6 +6,9 @@
 // pour que tout fonctionne aussi sur les pages chargées ensuite.
 // ==========================================================
 import { channelOf, pad2 } from '../lib/channels';
+import { langOf, ui } from '../i18n/ui';
+// Les textes affichés par ce script sont lus dans la page (attributs data-…)
+// ou dans src/i18n/ui.ts, selon la langue de la page (/en/ = anglais).
 
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -64,6 +67,9 @@ function showSnow(to: URL) {
   const ch = channelOf(to.pathname);
   const label = s.querySelector('[data-snow-ch]');
   if (label) label.textContent = ch ? `CH ${pad2(ch)}` : 'CH --';
+  // l'écran de neige reste d'une page à l'autre : on met son texte dans la langue de la page d'arrivée
+  const msg = s.querySelector('[data-snow-msg]');
+  if (msg) msg.textContent = ui[langOf(to.pathname)]['snow.searching'];
   s.style.opacity = '1';
   s.style.pointerEvents = 'auto';
   startNoise(s.querySelector('canvas')!);
@@ -101,8 +107,8 @@ document.addEventListener('click', (e) => {
     const open = btn.getAttribute('aria-expanded') !== 'true';
     btn.setAttribute('aria-expanded', String(open));
     panel.hidden = !open;
-    const label = btn.querySelector('[data-remote-label]');
-    if (label) label.textContent = open ? 'FERMER' : 'MENU';
+    const label = btn.querySelector<HTMLElement>('[data-remote-label]');
+    if (label) label.textContent = (open ? label.dataset.open : label.dataset.closed) ?? '';
     return;
   }
   // clic en dehors → on referme
@@ -110,8 +116,8 @@ document.addEventListener('click', (e) => {
     panel.hidden = true;
     const t = document.querySelector('[data-remote-toggle]');
     t?.setAttribute('aria-expanded', 'false');
-    const label = t?.querySelector('[data-remote-label]');
-    if (label) label.textContent = 'MENU';
+    const label = t?.querySelector<HTMLElement>('[data-remote-label]');
+    if (label) label.textContent = label.dataset.closed ?? 'MENU';
   }
 });
 document.addEventListener('keydown', (e) => {
@@ -163,7 +169,7 @@ function goTo(root: HTMLElement, index: number) {
       el.textContent = values[next];
     });
     const live = root.querySelector('[data-live]');
-    if (live) live.textContent = `Chaîne ${next + 1} sur ${n}`;
+    if (live) live.textContent = (root.dataset.liveText || 'Chaîne {i} sur {n}').replace('{i}', String(next + 1)).replace('{n}', String(n));
   });
 }
 document.addEventListener('click', (e) => {
@@ -231,7 +237,7 @@ function lbShow(i: number) {
   stage.scrollTop = 0;
   dlg.querySelector('[data-lb-caption]')!.textContent = item.dataset.caption || '';
   const several = lbItems.length > 1;
-  dlg.querySelector('[data-lb-counter]')!.textContent = several ? `${pad2(lbIndex + 1)} / ${pad2(lbItems.length)}` : isVideo ? 'LECTURE' : 'ZOOM';
+  dlg.querySelector('[data-lb-counter]')!.textContent = several ? `${pad2(lbIndex + 1)} / ${pad2(lbItems.length)}` : isVideo ? (dlg.dataset.play || 'LECTURE') : (dlg.dataset.zoomLabel || 'ZOOM');
   dlg.querySelectorAll<HTMLElement>('[data-lb-prev],[data-lb-next]').forEach((b) => (b.style.visibility = several ? 'visible' : 'hidden'));
 }
 function lbOpen(trigger: HTMLElement) {
@@ -301,7 +307,7 @@ document.addEventListener('submit', async (e) => {
     message: String(data.get('message') || '').trim(),
   };
   if (button) { button.disabled = true; button.dataset.label = button.textContent || ''; }
-  if (status) { status.hidden = false; status.textContent = 'Transmission en cours…'; }
+  if (status) { status.hidden = false; status.textContent = form.dataset.sending || 'Transmission en cours…'; }
   try {
     if (!pbUrl) throw new Error('PocketBase non configuré');
     const res = await fetch(`${pbUrl.replace(/\/$/, '')}/api/collections/messages/records`, {
@@ -315,7 +321,7 @@ document.addEventListener('submit', async (e) => {
     ok.hidden = false;
     ok.focus();
   } catch (err) {
-    if (status) status.textContent = 'Signal perdu… Le message n’est pas parti. Réessaie ou écris-moi directement par e-mail.';
+    if (status) status.textContent = form.dataset.error || 'Signal perdu… Le message n’est pas parti. Réessayez ou écrivez-moi directement par e-mail.';
     if (button) button.disabled = false;
     console.error(err);
   }

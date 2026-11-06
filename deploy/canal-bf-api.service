@@ -1,0 +1,21 @@
+# Service systemd : fait tourner PocketBase en permanence sur le VPS
+# (redémarre tout seul si le serveur ou PocketBase plante).
+# À copier dans /etc/systemd/system/canal-bf-api.service
+[Unit]
+Description=PocketBase du portfolio Canal BF
+After=network.target
+
+[Service]
+Type=simple
+User=etudiant
+Group=etudiant
+WorkingDirectory=/var/www/canal-bf-api
+# PocketBase n'écoute qu'en interne : Apache le rend public en HTTPS.
+# --origins : seuls ces sites peuvent l'appeler depuis un navigateur (formulaire de contact).
+ExecStart=/var/www/canal-bf-api/pocketbase serve --http=127.0.0.1:8090 --origins=https://portfolio.bambou-franceschini.fr,http://localhost:4321
+Restart=always
+RestartSec=3
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target

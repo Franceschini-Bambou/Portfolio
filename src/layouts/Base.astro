@@ -5,6 +5,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import TvLayer from '../components/TvLayer.astro';
 import BootScreen from '../components/BootScreen.astro';
+import { langOf, langs, switchLang, ogLocale, useT } from '../i18n/ui';
 import '../styles/global.css';
 
 interface Props {
@@ -12,17 +13,22 @@ interface Props {
   description?: string;
   /** nom de l'écran (utile pour les lecteurs d'écran) */
   label?: string;
+  /** page d'accueil : titre complet du site */
+  home?: boolean;
+  /** pas de version dans l'autre langue (page 404) */
+  noAlternate?: boolean;
 }
-const {
-  title,
-  description = 'Canal BF — le portfolio de Bambou Franceschini, designer graphique & audiovisuel, étudiante en BUT MMI à Montbéliard.',
-  label,
-} = Astro.props;
-const fullTitle = title === 'Accueil' ? 'Canal BF — Bambou Franceschini, designer graphique & audiovisuel' : `${title} — Canal BF · Bambou Franceschini`;
+// la langue se lit dans l'adresse : /en/... = anglais
+const lang = langOf(Astro.url.pathname);
+const t = useT(lang);
+const { title, description = t('meta.description'), label, home = false, noAlternate = false } = Astro.props;
+const fullTitle = home ? t('meta.homeTitle') : `${title} — Canal BF · Bambou Franceschini`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// la même page dans les deux langues (pour Google : balises hreflang)
+const alternates = noAlternate ? [] : langs.map((l) => ({ lang: l, href: new URL(switchLang(Astro.url.pathname, l), Astro.site) }));
 ---
 <!doctype html>
-<html lang="fr" transition:animate="none">
+<html lang={lang} transition:animate="none">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -36,11 +42,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale" content={ogLocale[lang]} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+    {alternates.length > 0 && <link rel="alternate" hreflang="x-default" href={alternates[0].href} />}
     <ClientRouter />
   </head>
   <body>
-    <a href="#contenu" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[1000] focus:bg-cream focus:px-4 focus:py-2 focus:text-ink">Aller au contenu</a>
+    <a href="#contenu" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[1000] focus:bg-cream focus:px-4 focus:py-2 focus:text-ink">{t('skip')}</a>
     <div class="relative min-h-screen">
       <Header />
       <main id="contenu" data-screen-label={label}>

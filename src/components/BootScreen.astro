@@ -11,13 +11,19 @@
 // • Bouton « Passer ▶ ». Désactivé si « réduire les animations ».
 // Le fonctionnement est dans src/scripts/boot.ts.
 // ==========================================================
-import { channels, pad2 } from '../lib/channels';
+import { channelsFor, pad2 } from '../lib/channels';
+import { langOf, useT } from '../i18n/ui';
+const lang = langOf(Astro.url.pathname);
+const t = useT(lang);
+const channels = channelsFor(lang);
+const msgs = t('boot.msgs').split('|');
 
 // graduations du cadran : canaux UHF 21 → 69
 const ticks = Array.from({ length: 49 }, (_, i) => 21 + i);
 const bars = ['#D9D4CC', '#E2B84A', '#2EE6D6', '#8CBF6F', '#FF2E88', '#6F080C', '#4F86A6'];
 ---
-<div id="boot" transition:persist="boot" role="status" aria-live="polite" aria-label="Chargement du site"
+<div id="boot" transition:persist="boot" role="status" aria-live="polite" aria-label={t('boot.aria')}
+  data-msgs={JSON.stringify(msgs)} data-start={t('boot.start')} data-found={t('boot.found')}
   class="boot fixed inset-0 z-[880] flex flex-col overflow-hidden bg-ink text-cream">
   <div class="boot-screen relative flex flex-1 flex-col px-5 pt-6 pb-5 sm:px-10 sm:pt-9 sm:pb-8">
     <!-- fond : marbre très léger + halo -->
@@ -26,14 +32,14 @@ const bars = ['#D9D4CC', '#E2B84A', '#2EE6D6', '#8CBF6F', '#FF2E88', '#6F080C', 
 
     <!-- OSD du haut -->
     <div class="boot-glitch relative flex items-start justify-between gap-4 font-vt text-[20px] leading-none sm:text-[28px]">
-      <span class="flex items-center gap-2.5 text-rose"><span class="animate-blink text-magenta" aria-hidden="true">●</span>MISE SOUS TENSION</span>
+      <span class="flex items-center gap-2.5 text-rose"><span class="animate-blink text-magenta" aria-hidden="true">●</span>{t('boot.power')}</span>
       <span class="text-right text-ch-green glow-green">AV · <span data-boot-freq>471.25</span> MHz</span>
     </div>
 
     <!-- centre -->
     <div class="boot-glitch relative mx-auto flex w-full max-w-[880px] flex-1 flex-col items-center justify-center gap-5 py-6 text-center sm:gap-7">
-      <img src="/logo-bf.svg" alt="" width="256" height="96" class="h-14 w-auto sm:h-20" style="filter:drop-shadow(-3px 0 0 rgba(46,230,214,.7)) drop-shadow(3px 0 0 rgba(255,46,136,.7))" />
-      <p class="m-0 font-display text-[clamp(1.9rem,6.2vw,4.25rem)] leading-[.9] chroma-3 sm:chroma-5">Réglage<br class="sm:hidden" /> automatique</p>
+      <img src="/logo-bf.webp" alt="" width="256" height="96" class="h-14 w-auto sm:h-20" style="filter:drop-shadow(-3px 0 0 rgba(46,230,214,.7)) drop-shadow(3px 0 0 rgba(255,46,136,.7))" />
+      <p class="m-0 font-display text-[clamp(1.9rem,6.2vw,4.25rem)] leading-[.9] chroma-3 sm:chroma-5" set:html={t('boot.title')} />
 
       <!-- pourcentage + barre à blocs -->
       <div class="flex w-full flex-col items-center gap-3">
@@ -41,7 +47,7 @@ const bars = ['#D9D4CC', '#E2B84A', '#2EE6D6', '#8CBF6F', '#FF2E88', '#6F080C', 
         <div class="flex w-full max-w-[640px] gap-[3px] border-[3px] border-cream p-[3px] sm:gap-1 sm:p-1" aria-hidden="true">
           {Array.from({ length: 24 }, () => <span data-boot-seg class="h-4 flex-1 bg-cream/10 sm:h-5"></span>)}
         </div>
-        <span class="font-vt text-[20px] leading-none text-rose sm:text-[24px]" data-boot-msg>Réglage de l'antenne…</span>
+        <span class="font-vt text-[20px] leading-none text-rose sm:text-[24px]" data-boot-msg>{msgs[0]}</span>
       </div>
 
       <!-- cadran du tuner -->
@@ -63,7 +69,7 @@ const bars = ['#D9D4CC', '#E2B84A', '#2EE6D6', '#8CBF6F', '#FF2E88', '#6F080C', 
             <span class="text-ch-green">CH {pad2(c.n)}</span>
             <span class="text-left">{c.label.toUpperCase()}</span>
             <span class="flex-1 overflow-hidden whitespace-nowrap text-cream/25" aria-hidden="true">··························</span>
-            <span data-boot-state class="whitespace-nowrap">RECHERCHE</span>
+            <span data-boot-state class="whitespace-nowrap">{t('boot.searching')}</span>
           </li>
         ))}
       </ul>
@@ -76,7 +82,7 @@ const bars = ['#D9D4CC', '#E2B84A', '#2EE6D6', '#8CBF6F', '#FF2E88', '#6F080C', 
       </div>
       <button type="button" data-boot-skip
         class="btn-retro border-[3px] border-cream bg-transparent px-4 py-1.5 font-vt text-[22px] font-normal leading-none text-cream [--sh:#000] [--sh-x:4px] [--sh-y:4px] hover:bg-bordeaux sm:text-[26px]">
-        Passer ▶
+        {t('boot.skip')}
       </button>
     </div>
 

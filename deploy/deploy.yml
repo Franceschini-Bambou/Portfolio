@@ -1,0 +1,54 @@
+# ==========================================================
+# DÉPLOIEMENT AUTOMATIQUE SUR LE VPS
+# À chaque « git push » sur main (ou en cliquant « Run workflow »
+# dans l'onglet Actions après avoir modifié du contenu dans
+# PocketBase), GitHub construit le site avec le contenu de
+# PocketBase en ligne, puis l'envoie sur le VPS (rsync en SSH).
+# Secrets : GitHub → Settings → Secrets and variables → Actions
+#   PUBLIC_PB_URL  https://api.bambou-franceschini.fr
+#   VPS_HOST       185.157.244.202
+#   VPS_PORT       23039
+#   VPS_USER       etudiant
+#   VPS_SSH_KEY    la clé privée créée pour GitHub (voir README, partie 10)
+# ==========================================================
+name: Déployer sur le VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Construire le site (contenu lu dans PocketBase en ligne)
+        run: npm run build
+        env:
+          PUBLIC_PB_URL: ${{ secrets.PUBLIC_PB_URL }}
+
+      - name: Préparer la connexion SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploiement
+          chmod 600 ~/.ssh/deploiement
+          ssh-keyscan -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Envoyer dist/ sur le VPS
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploiement -p ${{ secrets.VPS_PORT }}" \
+            dist/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/portfolio/"

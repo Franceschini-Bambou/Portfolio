@@ -2,15 +2,22 @@
 // En-tête « sélecteur de chaînes ».
 // Desktop : la télécommande horizontale de la maquette.
 // Mobile/tablette : barre compacte + télécommande qui se déplie.
-import { channels, channelOf, pad2 } from '../lib/channels';
+// Bouton FR | EN : la même page dans l'autre langue.
+import { channelsFor, channelOf, pad2 } from '../lib/channels';
+import { langOf, switchLang, routes, useT, type Lang } from '../i18n/ui';
+const lang = langOf(Astro.url.pathname);
+const t = useT(lang);
+const channels = channelsFor(lang);
 const current = channelOf(Astro.url.pathname);
 const top = channels.slice(0, 3); // Accueil, Projets, À propos (Contact = bouton REC)
+const other: Lang = lang === 'fr' ? 'en' : 'fr';
+const otherHref = switchLang(Astro.url.pathname, other);
 ---
 <header class="sticky top-0 z-[500] border-b-[3px] border-bordeaux bg-ink">
-  <div class="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 py-2.5 sm:px-6 lg:gap-8 lg:px-12 lg:py-3.5">
+  <div class="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 py-2.5 sm:px-6 lg:gap-5 lg:px-10 lg:py-3.5 xl:gap-8 xl:px-12">
     <!-- Logo -->
-    <a href="/" class="flex items-center gap-3 no-underline lg:gap-3.5" aria-label="Canal BF — retour à l'accueil">
-      <img src="/logo-bf.svg" alt="" width="160" height="60" class="block h-11 w-auto sm:h-[52px] lg:h-[60px]" style="filter:drop-shadow(-2px 0 0 rgba(46,230,214,.7)) drop-shadow(2px 0 0 rgba(255,46,136,.7))" />
+    <a href={routes.home[lang]} class="flex shrink-0 items-center gap-3 no-underline lg:gap-3.5" aria-label={t('nav.homeAria')}>
+      <img src="/logo-bf.webp" alt="" width="160" height="60" class="block h-11 w-auto sm:h-[52px] lg:h-[60px]" style="filter:drop-shadow(-2px 0 0 rgba(46,230,214,.7)) drop-shadow(2px 0 0 rgba(255,46,136,.7))" />
       <span class="hidden flex-col leading-none whitespace-nowrap sm:flex lg:hidden wide:flex">
         <span class="font-vt text-[24px] tracking-[2px] text-cream sm:text-[30px]">CANAL BF</span>
         <span class="hidden font-vt text-[20px] text-rose sm:block">Bambou Franceschini</span>
@@ -18,13 +25,13 @@ const top = channels.slice(0, 3); // Accueil, Projets, À propos (Contact = bout
     </a>
 
     <!-- Navigation desktop -->
-    <nav class="hidden items-center gap-2.5 rounded-2xl border-2 border-panel-line bg-panel p-2 shadow-[inset_0_2px_0_rgba(255,255,255,.06)] lg:flex" aria-label="Navigation principale">
-      <span class="hidden pr-2.5 pl-2 font-vt text-[20px] tracking-[1px] text-rose wide:inline" aria-hidden="true">CHAÎNE ▸</span>
+    <nav class="hidden items-center gap-2.5 rounded-2xl border-2 border-panel-line bg-panel p-2 shadow-[inset_0_2px_0_rgba(255,255,255,.06)] lg:flex" aria-label={t('nav.main')}>
+      <span class="hidden pr-2.5 pl-2 font-vt text-[20px] tracking-[1px] text-rose wide:inline" aria-hidden="true">{t('nav.channel')}</span>
       {top.map((c) => {
         const on = c.n === current;
         return (
           <a href={c.href} aria-current={on ? 'page' : undefined}
-            class:list={['remote-key flex items-center gap-2.5 whitespace-nowrap rounded-[10px] px-[18px] pt-2 pb-[7px] text-[18px] font-medium no-underline', on ? 'bg-bordeaux text-cream' : 'bg-cream text-ink']}>
+            class:list={['remote-key flex items-center gap-2.5 whitespace-nowrap rounded-[10px] px-3.5 pt-2 pb-[7px] text-[18px] font-medium no-underline xl:px-[18px]', on ? 'bg-bordeaux text-cream' : 'bg-cream text-ink']}>
             <span class="font-vt text-[28px] leading-none">{pad2(c.n)}</span>
             <span>{c.label}</span>
             <span class:list={['size-2 rounded-full', on ? 'bg-magenta' : 'bg-led']} aria-hidden="true"></span>
@@ -33,19 +40,29 @@ const top = channels.slice(0, 3); // Accueil, Projets, À propos (Contact = bout
       })}
     </nav>
 
-    <a href="/contact/" aria-current={current === 4 ? 'page' : undefined}
-      class="btn-retro hidden items-center gap-2.5 whitespace-nowrap rounded-full border-2 border-cream bg-bordeaux px-[22px] py-3 text-[18px] text-cream [--sh-x:4px] [--sh-y:4px] [--sh:#000] lg:inline-flex">
-      <span class="size-3 animate-[blink_1.2s_steps(1)_infinite] rounded-full bg-magenta" aria-hidden="true"></span>
-      <span class="font-vt text-[22px] font-normal" aria-hidden="true">REC</span>
-      <span>Me contacter</span>
-    </a>
+    <div class="hidden items-center gap-3 lg:flex">
+      <a href={routes.contact[lang]} aria-current={current === 4 ? 'page' : undefined}
+        class="btn-retro inline-flex items-center gap-2.5 whitespace-nowrap rounded-full border-2 border-cream bg-bordeaux px-[18px] py-3 xl:px-[22px] text-[18px] text-cream [--sh-x:4px] [--sh-y:4px] [--sh:#000]">
+        <span class="size-3 animate-[blink_1.2s_steps(1)_infinite] rounded-full bg-magenta" aria-hidden="true"></span>
+        <span class="font-vt text-[22px] font-normal" aria-hidden="true">REC</span>
+        <span>{t('contactMe')}</span>
+      </a>
+      <!-- Langue : comme la touche « son bilingue » des vieilles télés -->
+      <a href={otherHref} hreflang={other} lang={other} aria-label={t('lang.switchAria')} data-lang-switch
+        class="remote-key flex items-center rounded-[10px] border-2 border-panel-line bg-panel p-1 font-vt text-[22px] leading-none no-underline">
+        <span class:list={['rounded-md px-2 pt-1.5 pb-1', lang === 'fr' ? 'bg-bordeaux text-cream' : 'text-rose']} aria-hidden="true">FR</span>
+        <span class:list={['rounded-md px-2 pt-1.5 pb-1', lang === 'en' ? 'bg-bordeaux text-cream' : 'text-rose']} aria-hidden="true">EN</span>
+      </a>
+    </div>
 
     <!-- Mobile : chaîne en cours + bouton télécommande -->
     <div class="flex items-center gap-3 lg:hidden">
       {current > 0 && <span class="font-vt text-[28px] leading-none whitespace-nowrap text-ch-green glow-green" aria-hidden="true">CH {pad2(current)}</span>}
+      <a href={otherHref} hreflang={other} lang={other} aria-label={t('lang.switchAria')} data-lang-switch
+        class="remote-key flex h-11 items-center rounded-[10px] border-2 border-panel-line bg-panel px-2.5 font-vt text-[24px] leading-none text-rose no-underline">{other.toUpperCase()}</a>
       <button type="button" data-remote-toggle aria-expanded="false" aria-controls="remote"
         class="remote-key flex h-11 items-center gap-2 rounded-[10px] border-2 border-panel-line bg-cream px-3.5 font-vt text-[24px] leading-none text-ink">
-        <span data-remote-label>MENU</span>
+        <span data-remote-label data-open={t('nav.close')} data-closed={t('nav.menu')}>{t('nav.menu')}</span>
         <span class="size-2 rounded-full bg-magenta" aria-hidden="true"></span>
       </button>
     </div>
@@ -53,9 +70,9 @@ const top = channels.slice(0, 3); // Accueil, Projets, À propos (Contact = bout
 
   <!-- Télécommande mobile -->
   <div id="remote" hidden class="absolute inset-x-0 top-full border-b-[3px] border-bordeaux bg-ink/95 backdrop-blur-sm lg:hidden">
-    <nav class="mx-3 my-3 rounded-[28px] border-2 border-panel-line bg-panel p-4 shadow-[inset_0_2px_0_rgba(255,255,255,.06),0_10px_0_#000] sm:mx-6 sm:p-6" aria-label="Navigation principale (mobile)">
+    <nav class="mx-3 my-3 rounded-[28px] border-2 border-panel-line bg-panel p-4 shadow-[inset_0_2px_0_rgba(255,255,255,.06),0_10px_0_#000] sm:mx-6 sm:p-6" aria-label={t('nav.mainMobile')}>
       <div class="mb-4 flex items-center justify-between font-vt text-[20px] text-rose">
-        <span>TÉLÉCOMMANDE · CANAL BF</span>
+        <span>{t('nav.remote')}</span>
         <span class="size-2.5 animate-blink rounded-full bg-magenta" aria-hidden="true"></span>
       </div>
       <ul class="m-0 grid list-none grid-cols-2 gap-3 p-0" role="list">
@@ -75,9 +92,9 @@ const top = channels.slice(0, 3); // Accueil, Projets, À propos (Contact = bout
           );
         })}
       </ul>
-      <a href="/contact/" class="btn-retro mt-4 w-full justify-center rounded-full border-2 border-cream bg-bordeaux px-5 py-3.5 text-[18px] text-cream [--sh-x:0px] [--sh-y:4px] [--sh:#000]">
+      <a href={routes.contact[lang]} class="btn-retro mt-4 w-full justify-center rounded-full border-2 border-cream bg-bordeaux px-5 py-3.5 text-[18px] text-cream [--sh-x:0px] [--sh-y:4px] [--sh:#000]">
         <span class="size-3 animate-blink rounded-full bg-magenta" aria-hidden="true"></span>
-        <span class="font-vt text-[22px] font-normal" aria-hidden="true">REC</span> Me contacter
+        <span class="font-vt text-[22px] font-normal" aria-hidden="true">REC</span> {t('contactMe')}
       </a>
     </nav>
   </div>

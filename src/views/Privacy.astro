@@ -1,0 +1,36 @@
+---
+// POLITIQUE DE CONFIDENTIALITÉ / PRIVACY POLICY
+import LegalPage from '../components/LegalPage.astro';
+import { getContent } from '../lib/data';
+import type { Lang } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const { site } = await getContent(lang);
+---
+{lang === 'fr' ? (
+  <LegalPage title="Politique de confidentialité" file="confidentialite.txt">
+    <h2>Données collectées</h2>
+    <p>Le seul endroit où ce site collecte des données est le formulaire de contact : nom, prénom, adresse e-mail et message.</p>
+    <h2>À quoi elles servent</h2>
+    <p>Uniquement à vous répondre. Elles ne sont ni revendues, ni transmises, ni utilisées à des fins publicitaires.</p>
+    <h2>Où elles sont stockées</h2>
+    <p>Dans la base de données PocketBase du site, accessible uniquement par moi. Les messages sont supprimés au plus tard 12 mois après notre dernier échange.</p>
+    <h2>Cookies et mesure d'audience</h2>
+    <p>Ce site ne dépose aucun cookie et n'utilise aucun outil de suivi ou de mesure d'audience. Les polices sont hébergées sur le site lui-même (aucun appel à des services tiers). Seul un petit indicateur technique est gardé dans la mémoire de session de votre navigateur, pour ne pas rejouer l'écran de chargement à chaque page ; il s'efface dès que vous fermez l'onglet.</p>
+    <h2>Vos droits</h2>
+    <p>Conformément au RGPD, vous pouvez demander à consulter, corriger ou supprimer vos données en m'écrivant à <a href={`mailto:${site.email}`}>{site.email}</a>. Vous pouvez aussi adresser une réclamation à la CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>).</p>
+  </LegalPage>
+) : (
+  <LegalPage title="Privacy policy" file="privacy.txt">
+    <h2>Data collected</h2>
+    <p>The only place where this website collects data is the contact form: last name, first name, email address and message.</p>
+    <h2>What it is used for</h2>
+    <p>Only to reply to you. Your data is never sold, shared or used for advertising.</p>
+    <h2>Where it is stored</h2>
+    <p>In the website's PocketBase database, which only I can access. Messages are deleted no later than 12 months after our last exchange.</p>
+    <h2>Cookies and analytics</h2>
+    <p>This website sets no cookies and uses no tracking or analytics tools. Fonts are hosted on the website itself (no calls to third-party services). Only a small technical flag is kept in your browser's session storage, so the loading screen isn't replayed on every page; it is cleared as soon as you close the tab.</p>
+    <h2>Your rights</h2>
+    <p>Under the GDPR, you can ask to access, correct or delete your data by writing to me at <a href={`mailto:${site.email}`}>{site.email}</a>. You can also lodge a complaint with the CNIL, the French data protection authority (<a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>).</p>
+  </LegalPage>
+)}

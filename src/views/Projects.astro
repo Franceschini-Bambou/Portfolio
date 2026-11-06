@@ -1,0 +1,49 @@
+---
+// CH 02 — MES PROJETS (guide des programmes + filtres), en français et en anglais
+import Base from '../layouts/Base.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import ChannelNumber from '../components/ChannelNumber.astro';
+import ProgramGuide from '../components/ProgramGuide.astro';
+import { getContent, genreColors } from '../lib/data';
+import { genreLabels, useT, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+const { projects } = await getContent(lang);
+// value = genre enregistré dans PocketBase (en français) ; label = texte affiché
+const filters = Object.keys(genreColors).map((value) => ({
+  value,
+  label: genreLabels[lang][value] ?? value,
+  dot: genreColors[value],
+  count: value === 'Tous' ? projects.length : projects.filter((p) => p.genre === value).length,
+}));
+---
+<Base title={t('projects.title')} label={`CH 02 ${t('ch.projects')}`} description={t('projects.description')}>
+  <section class="border-t-[3px] border-ink bg-rose text-ink">
+    <div class="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 pt-8 pb-24 sm:px-6 lg:gap-12 lg:px-14 lg:pt-[110px] lg:pb-[120px]">
+      <div class="flex flex-col gap-6 lg:gap-7">
+        <div class="flex items-start justify-between gap-4">
+          <Eyebrow>{t('projects.eyebrow')}</Eyebrow>
+          <ChannelNumber n={2} color="text-bordeaux chroma-3" />
+        </div>
+        <h1 class="m-0 font-display text-h1-projets leading-[.86] text-bordeaux chroma-3 sm:chroma-6" set:html={t('projects.h1')} />
+        <p class="m-0 max-w-[760px] text-lead-sm leading-[1.4] font-medium">{t('projects.lead')}</p>
+
+        <div class="mt-2 flex flex-wrap items-center gap-3" role="group" aria-label={t('projects.filterAria')}>
+          <span class="mr-1.5 w-full font-vt text-[26px] sm:w-auto" aria-hidden="true">{t('projects.filter')}</span>
+          {filters.map((f, i) => (
+            <button type="button" data-filter={f.value} aria-pressed={i === 0 ? 'true' : 'false'}
+              class="btn-retro border-[3px] border-ink bg-cream px-3.5 py-2 text-[17px] text-ink [--sh-x:4px] [--sh-y:4px] [--sh:var(--color-ink)] aria-pressed:bg-ink aria-pressed:text-cream aria-pressed:[--sh:var(--color-bordeaux)] sm:px-[18px] sm:py-2.5 sm:text-[20px]">
+              <span class="size-3.5 border-2 border-ink" style={`background:${f.dot}`} aria-hidden="true"></span>
+              {f.label}
+              <span class="font-vt text-[22px] font-normal">({f.count})</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <ProgramGuide projects={projects} filterable grid />
+    </div>
+  </section>
+</Base>

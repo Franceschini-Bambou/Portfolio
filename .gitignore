@@ -26,3 +26,6 @@ pnpm-debug.log*
 pb_data/
 pocketbase
 pocketbase.exe
+
+# CV (contient ton téléphone : il va dans PocketBase, pas sur GitHub)
+cv/

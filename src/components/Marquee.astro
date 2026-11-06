@@ -2,11 +2,13 @@
 // Bande défilante des logiciels : tous les outils de la collection « tools »
 // de PocketBase (la liste est doublée pour boucler sans saut)
 import { getContent } from '../lib/data';
-const { tools } = await getContent();
+import { langOf, useT } from '../i18n/ui';
+const lang = langOf(Astro.url.pathname);
+const { tools } = await getContent(lang);
 const marquee = [...new Set(tools.flatMap((t) => t.items).map((t) => t.toUpperCase()))];
 const items = [...marquee, ...marquee];
 ---
-<div class="overflow-hidden border-y-[3px] border-ink bg-bordeaux py-2.5 sm:py-3.5" aria-label="Logiciels utilisés">
+<div class="overflow-hidden border-y-[3px] border-ink bg-bordeaux py-2.5 sm:py-3.5" aria-label={useT(lang)('marquee')}>
   <ul class="m-0 flex w-max animate-marquee list-none p-0 hover:[animation-play-state:paused]" role="list">
     {items.map((m, i) => (
       <li class="flex items-center gap-5 pr-5 font-vt text-[28px] leading-none whitespace-nowrap text-cream sm:gap-7 sm:pr-7 sm:text-[40px]" aria-hidden={i >= marquee.length ? 'true' : undefined}>
