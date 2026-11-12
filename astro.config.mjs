@@ -14,9 +14,11 @@ export default defineConfig({
   trailingSlash: 'ignore',
   prefetch: { prefetchAll: true },
   image: {
-    remotePatterns: pbUrl
-      ? [{ protocol: pbUrl.protocol.replace(':', ''), hostname: pbUrl.hostname, ...(pbUrl.port ? { port: pbUrl.port } : {}) }]
-      : [],
+    // images autorisées : PocketBase en ligne (toujours) + celui indiqué dans .env
+    remotePatterns: [
+      { protocol: 'https', hostname: 'api.bambou-franceschini.fr' },
+      ...(pbUrl ? [{ protocol: pbUrl.protocol.replace(':', ''), hostname: pbUrl.hostname, ...(pbUrl.port ? { port: pbUrl.port } : {}) }] : []),
+    ],
   },
   vite: {
     plugins: [tailwindcss()],
