@@ -1,7 +1,7 @@
 # QUALITÉ — Canal BF (portfolio de Bambou Franceschini)
 
 Site contrôlé : **https://portfolio.bambou-franceschini.fr** (site statique Astro, contenu lu au build dans PocketBase sur https://api.bambou-franceschini.fr, hébergé sur le VPS de l'IUT).
-Contrôle réalisé le **12 novembre 2026**.
+Contrôle réalisé le **12 novembre 2026** sur le build local, puis **revérifié sur le site en ligne le 16 novembre 2026** après déploiement des corrections (voir la section 5).
 
 ## Ce qui rend ce site particulier (et donc ce qu'il faut contrôler)
 
@@ -51,7 +51,9 @@ Les critères ci-dessous ne sont pas une liste générique : ils viennent des ch
 | **Iframes nommées** | HTML | ✅ chaque iframe a un `title` (« Prototype interactif — L'Œil du Lion ») | — |
 | **Vidéo sous-titrée** (WCAG 1.2.2) | lecture du code | ❌ la vidéo « Pourquoi la danse ? » contient des paroles (interviews) sans sous-titres | Le site sait maintenant afficher des sous-titres (piste `<track>`, champ `video_captions` ajouté dans PocketBase). **Reste à faire** : créer le fichier `.vtt` (export des sous-titres automatiques de CapCut, relus) et le déposer dans PocketBase |
 
-**Résultat après corrections : axe-core 0 erreur sur les 12 pages, à 1440 px comme à 390 px. Lighthouse Accessibilité : 100 sur les 4 pages mesurées.**
+| **Contraste des numéros d'étapes** (01, 02, 03… sur les pages projet) | axe-core sur le site en ligne (16/11) | ⚠️ signalé par axe à 1440 px : chiffres remplis de la couleur du type de projet (vert `#8CBF6F` = 1,97:1, jaune `#E2B84A` sur crème) | **Exception justifiée, non corrigée** : ces chiffres font 72 px, sont **entourés d'un contour encre de 2 px** (`-webkit-text-stroke`, encre/crème 17,5:1) qui dessine la forme du chiffre, et sont `aria-hidden` car l'ordre est déjà donné par la liste `<ol>`. axe ne sait pas prendre en compte le contour : c'est un faux positif de l'outil, vérifié à l'œil |
+
+**Résultat après corrections : axe-core 0 erreur sur les 12 pages contrôlées au build, à 1440 px comme à 390 px. Sur le site en ligne (14 pages, dont les 6 pages projet), 0 erreur hors l'exception justifiée ci-dessus. Lighthouse Accessibilité : 100 sur les 4 pages mesurées.**
 
 ## 2. Sobriété et performance — que coûte le site à charger, et pourquoi ?
 
@@ -97,6 +99,29 @@ Les critères ci-dessous ne sont pas une liste générique : ils viennent des ch
 | **Droits d'auteur des contenus publiés** | relecture projet par projet | ✅ créations personnelles ; projet SAÉ 303 : **Thomas Perruchot crédité** et licences des données (Apache-2.0, Licence Ouverte 2.0) ajoutées dans les mentions ; citation de Milton Glaser en courte citation ; polices sous licence libre (SIL OFL / Apache 2.0) | Ajout du crédit binôme et des licences dans les mentions légales |
 | **Droit à l'image** | relecture | ⚠️ la vidéo « Pourquoi la danse ? » montre des danseurs identifiables | **À vérifier** : garder l'accord écrit des personnes filmées (ou le leur demander) |
 
+## 5. Vérification sur le site en ligne — 16 novembre 2026
+
+En relisant le site publié, j'ai constaté que **les corrections du 12 novembre n'avaient pas encore été envoyées sur GitHub** : le site en ligne n'avait ni sitemap, ni image de partage, ni bouton pause, et les mentions légales citaient encore l'ancien hébergeur. Les corrections ont été poussées, le déploiement automatique a reconstruit le site, puis chaque point a été recontrôlé **directement sur https://portfolio.bambou-franceschini.fr** :
+
+| Point contrôlé | Comment | Résultat en ligne |
+|---|---|---|
+| Plan du site | requête sur `/sitemap.xml` | ✅ 200, **24 adresses** (pages FR/EN + projets) avec `hreflang` |
+| `robots.txt` | lecture du fichier | ✅ lien vers le sitemap présent |
+| Image de partage | requête sur `/og-canal-bf.png` + balises | ✅ 200, `og:image` et `twitter:card = summary_large_image` |
+| Préchargement des polices | balises `<link rel="preload">` | ✅ Bungee et VT323 |
+| Compression | en-tête `Content-Encoding` | ✅ **gzip** actif |
+| Page 404 | adresse inexistante | ✅ statut 404 + `noindex` |
+| Bouton pause de la bande défilante | HTML de l'accueil | ✅ présent |
+| Titre de la liste des projets | HTML de `/projets/` | ✅ h2 « Liste des projets » |
+| Nom accessible du logo | attribut `alt` | ✅ « Canal BF Bambou Franceschini — retour à l'accueil » |
+| Façade des iframes | HTML de la page L'Œil du Lion | ✅ bouton de chargement présent, **0 iframe** dans la page avant le clic |
+| Couleur par type de projet | style des pages Olyvia! et L'Œil du Lion | ✅ jaune `#E2B84A` (Design UI/UX) |
+| Mentions légales | texte de la page | ✅ hébergement sur le VPS, Infomaniak pour le domaine, crédit de Thomas Perruchot |
+| Politique de confidentialité | texte de la page | ✅ parties « Journaux techniques » et « Contenus intégrés » |
+| Accessibilité automatique | axe-core 4.10 injecté dans chaque page publiée, à 1440 px et 390 px | ✅ 0 erreur sauf les numéros d'étapes (exception justifiée, section 1) |
+
+**Leçon retenue :** un contrôle qualité ne vaut que sur ce qui est réellement publié. Je revérifie désormais le site en ligne après chaque déploiement, et pas seulement mon build local.
+
 ---
 
 ## À surveiller (non corrigé, ou à confirmer)
@@ -105,5 +130,5 @@ Les critères ci-dessous ne sont pas une liste générique : ils viennent des ch
 - **Hébergeur exact du VPS** : à confirmer avec l'IUT, puis ajuster les mentions légales si besoin.
 - **Droit à l'image** des danseurs de « Pourquoi la danse ? ».
 - **Poids des pages riches en images** (« L'évolution du temps », « À propos ») : les photos d'origine dans PocketBase font jusqu'à 5 Mo. Le site les redimensionne, mais la **loupe** charge l'image d'origine. Piste : réduire les originaux à 2500 px avant de les déposer.
-- **Compression gzip** : vérifier en ligne qu'elle est active (`curl -sI -H "Accept-Encoding: gzip" https://portfolio.bambou-franceschini.fr/ | grep -i content-encoding`).
-- Refaire **axe + Lighthouse** à chaque nouveau projet ajouté dans PocketBase.
+- **Sous-titres en ligne** : la migration `video_captions` doit aussi être appliquée au PocketBase du VPS (envoyer le fichier de migration sur le serveur puis redémarrer le service) avant de déposer le `.vtt`.
+- Refaire **axe + Lighthouse sur le site en ligne** à chaque nouveau projet ajouté dans PocketBase.

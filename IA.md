@@ -20,7 +20,7 @@
 | **PocketBase** | migrations (collections, champs anglais, nouveaux projets), hook d'e-mail | vérification des fiches dans l'admin, correction du rôle et des textes |
 | **Textes des fiches projet** (FR + EN) | rédaction à partir de mes documents (consignes de TP, bilan des tests, conversation de SAÉ, site de la SAÉ 303) | relecture, vérification des chiffres dans mes propres sources |
 | **Déploiement** | commandes pas à pas (VPS, Apache, certbot, GitHub Actions), fichiers de configuration | exécution des commandes moi-même sur le serveur, vérification que tout marche |
-| **Contrôle qualité** | tests axe-core et Lighthouse, corrections d'accessibilité, de référencement et des pages légales, rédaction de `QUALITE.md` | relecture des corrections, points à confirmer (hébergeur, droit à l'image, sous-titres) |
+| **Contrôle qualité** | tests axe-core et Lighthouse, corrections d'accessibilité, de référencement et des pages légales, rédaction de `QUALITE.md`, revérification du site en ligne après déploiement | relecture des corrections, push et déploiement faits par moi, décision de garder les numéros d'étapes colorés, points à confirmer (hébergeur, droit à l'image, sous-titres) |
 | **Journal** | brouillon reconstitué à partir de l'historique | complété et réécrit avec mon vécu |
 
 ## Exemples de demandes faites à l'IA

@@ -24,3 +24,8 @@
 - **Fait :** changement d'ordinateur, réinstallation (Node.js, Git, extensions VS Code, `npm install`, fichier `.env`). **Mise en ligne du site** sur `portfolio.bambou-franceschini.fr` avec un déploiement automatique GitHub Actions (build + envoi en SSH sur le VPS à chaque push). Contrôle qualité (accessibilité, sobriété, référencement, juridique) et corrections : voir `QUALITE.md`.
 - **Décidé :** les projets intégrés (Figma, sites) ne se chargent qu'au clic : plus léger, et pas de cookies tiers sans accord. Ajout d'un plan du site, d'une image de partage, d'un bouton pause sur la bande défilante.
 - **Ce qui a coincé :** PowerShell bloquait `npm` (règle d'exécution des scripts à changer) ; le premier déploiement semblait ne pas se lancer (je regardais l'ancien lancement, le nouveau était déjà passé au vert).
+
+## Semaine 47 — du 16 au 22 novembre
+- **Fait :** vérification du site **en ligne** avant le rendu. Les corrections qualité de la semaine précédente n'avaient jamais été poussées sur GitHub : le site publié n'avait ni sitemap, ni image de partage, ni bouton pause, et les mentions légales étaient périmées. Push des corrections, déploiement automatique, puis nouveau contrôle point par point sur le site publié (sitemap, gzip, 404, mentions, axe-core sur les 14 pages). Ajout de la section 5 dans `QUALITE.md`.
+- **Décidé :** les numéros d'étapes colorés signalés par axe restent tels quels (contour encre lisible, chiffres décoratifs `aria-hidden`), et je l'explique dans la grille plutôt que de cacher le problème.
+- **Ce qui a coincé :** j'avais contrôlé mon build local en pensant que c'était le site en ligne. Désormais je vérifie toujours après chaque déploiement.
