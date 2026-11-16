@@ -27,7 +27,6 @@ const t = useT(lang);
           <Tag
             href={p.hasPage ? projectUrl(lang, p.slug) : undefined}
             class:list={['group grid grid-cols-1 bg-cream text-ink no-underline transition-colors md:grid-cols-[110px_minmax(0,.85fr)_minmax(0,1fr)] lg:grid-cols-[130px_minmax(0,.9fr)_minmax(0,1fr)] xl:grid-cols-[150px_460px_minmax(0,1fr)]', p.hasPage ? 'cursor-pointer hover:bg-white' : 'cursor-default', grid && 'lg:h-full lg:grid-cols-1! lg:grid-rows-[auto_auto_1fr]']}
-            aria-label={p.hasPage ? `${p.title} — ${t('guide.see')}` : undefined}
           >
             <div class:list={['flex items-center gap-3 px-4 pt-4 md:flex-col md:items-start md:gap-2.5 md:py-6 lg:px-5', grid && 'lg:flex-row! lg:items-center! lg:gap-3! lg:pt-5! lg:pb-0!']}>
               <span class:list={['font-vt text-[40px] leading-[.9] md:text-[42px] lg:text-[48px]', grid && 'lg:text-[40px]!']}>{p.time}</span>

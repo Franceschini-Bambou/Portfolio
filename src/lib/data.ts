@@ -30,6 +30,8 @@ export interface Project {
   thumbnails: Media[];
   hero?: Media;
   video?: string;
+  /** sous-titres de la vidéo (fichier .vtt), pour les personnes sourdes ou malentendantes */
+  videoCaptions?: string;
   videoPoster?: Media;
   gallery: { src: Media; title: string; num: string }[];
   /** titre de la galerie (« Les affiches », « Les visuels »…) */
@@ -103,12 +105,14 @@ async function fromPocketBase(url: string, lang: Lang): Promise<Content> {
     },
     projects: projects.map((p: any) => {
       const titles = list(p, 'gallery_titles');
+      const genre = normalizeGenre(p.genre);
       return {
-        id: p.id, slug: p.slug, title: tr(p, 'title'), genre: normalizeGenre(p.genre), genreLabel: genreLabels[lang][normalizeGenre(p.genre)] ?? p.genre,
+        id: p.id, slug: p.slug, title: tr(p, 'title'), genre, genreLabel: genreLabels[lang][genre] ?? p.genre,
         year: p.year, time: p.time, channel: p.channel,
-        color: p.color || '#DBBCDA', description: tr(p, 'description'), tags: list(p, 'tags'),
+        // la couleur suit le type de projet (jaune = Design UI/UX, vert = Développement web, bleu = Audiovisuel)
+        color: genreColors[genre] ?? (p.color || '#DBBCDA'), description: tr(p, 'description'), tags: list(p, 'tags'),
         thumbnails: (p.thumbnails ?? []).map((n: string) => file(p, n)),
-        hero: file(p, p.hero), video: file(p, p.video), videoPoster: file(p, p.video_poster),
+        hero: file(p, p.hero), video: file(p, p.video), videoPoster: file(p, p.video_poster), videoCaptions: file(p, p.video_captions) as string | undefined,
         gallery: (p.gallery ?? []).map((n: string, j: number) => ({ src: file(p, n)!, title: titles[j] ?? '', num: pad(j + 1) })),
         galleryTitle: tr(p, 'gallery_title').trim() || (lang === 'en' ? 'The posters' : 'Les affiches'),
         context: tr(p, 'context'), problem: tr(p, 'problem'), steps: list(p, 'steps'), result: tr(p, 'result'), role: tr(p, 'role'),

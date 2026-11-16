@@ -14,9 +14,13 @@ const { site } = await getContent(lang);
     <h2>À quoi elles servent</h2>
     <p>Uniquement à vous répondre. Elles ne sont ni revendues, ni transmises, ni utilisées à des fins publicitaires.</p>
     <h2>Où elles sont stockées</h2>
-    <p>Dans la base de données PocketBase du site, accessible uniquement par moi. Les messages sont supprimés au plus tard 12 mois après notre dernier échange.</p>
+    <p>Dans la base de données PocketBase du site, sur un serveur situé en France, accessible uniquement par moi. Les messages sont supprimés au plus tard 12 mois après notre dernier échange.</p>
+    <h2>Journaux techniques</h2>
+    <p>Comme tout serveur web, le serveur enregistre l'adresse IP et la page demandée à chaque visite, pour la sécurité et le bon fonctionnement du site. Ces journaux ne servent à rien d'autre et sont effacés automatiquement au bout de quelques semaines.</p>
+    <h2>Contenus intégrés</h2>
+    <p>Certaines pages projet peuvent afficher un prototype Figma ou un site réalisé ailleurs (Netlify, par exemple). Ils ne se chargent que si vous cliquez sur « Lancer… » : avant ce clic, aucune donnée n'est envoyée à ces services. Après, ce sont leurs propres règles qui s'appliquent (Figma peut déposer des cookies).</p>
     <h2>Cookies et mesure d'audience</h2>
-    <p>Ce site ne dépose aucun cookie et n'utilise aucun outil de suivi ou de mesure d'audience. Les polices sont hébergées sur le site lui-même (aucun appel à des services tiers). Seul un petit indicateur technique est gardé dans la mémoire de session de votre navigateur, pour ne pas rejouer l'écran de chargement à chaque page ; il s'efface dès que vous fermez l'onglet.</p>
+    <p>Ce site ne dépose aucun cookie et n'utilise aucun outil de suivi ou de mesure d'audience. Les polices sont hébergées sur le site lui-même. Seul un petit indicateur technique est gardé dans la mémoire de session de votre navigateur, pour ne pas rejouer l'écran de chargement à chaque page ; il s'efface dès que vous fermez l'onglet.</p>
     <h2>Vos droits</h2>
     <p>Conformément au RGPD, vous pouvez demander à consulter, corriger ou supprimer vos données en m'écrivant à <a href={`mailto:${site.email}`}>{site.email}</a>. Vous pouvez aussi adresser une réclamation à la CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>).</p>
   </LegalPage>
@@ -27,9 +31,13 @@ const { site } = await getContent(lang);
     <h2>What it is used for</h2>
     <p>Only to reply to you. Your data is never sold, shared or used for advertising.</p>
     <h2>Where it is stored</h2>
-    <p>In the website's PocketBase database, which only I can access. Messages are deleted no later than 12 months after our last exchange.</p>
+    <p>In the website's PocketBase database, on a server located in France, which only I can access. Messages are deleted no later than 12 months after our last exchange.</p>
+    <h2>Server logs</h2>
+    <p>Like any web server, the server records the IP address and requested page for each visit, for security and to keep the site running. These logs are used for nothing else and are deleted automatically after a few weeks.</p>
+    <h2>Embedded content</h2>
+    <p>Some project pages can show a Figma prototype or a site built elsewhere (on Netlify, for example). They only load if you click “Launch…”: before that click, no data is sent to these services. After it, their own rules apply (Figma may set cookies).</p>
     <h2>Cookies and analytics</h2>
-    <p>This website sets no cookies and uses no tracking or analytics tools. Fonts are hosted on the website itself (no calls to third-party services). Only a small technical flag is kept in your browser's session storage, so the loading screen isn't replayed on every page; it is cleared as soon as you close the tab.</p>
+    <p>This website sets no cookies and uses no tracking or analytics tools. Fonts are hosted on the website itself. Only a small technical flag is kept in your browser's session storage, so the loading screen isn't replayed on every page; it is cleared as soon as you close the tab.</p>
     <h2>Your rights</h2>
     <p>Under the GDPR, you can ask to access, correct or delete your data by writing to me at <a href={`mailto:${site.email}`}>{site.email}</a>. You can also lodge a complaint with the CNIL, the French data protection authority (<a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>).</p>
   </LegalPage>

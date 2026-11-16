@@ -88,8 +88,19 @@ const links = [
         {/* Télé du haut : le prototype Figma s'il y en a un, sinon l'image « hero », sinon le carrousel de la galerie */}
         {pj.embed ? (
           <Window title={pj.embedKind === 'figma' ? 'prototype.fig' : `${pj.slug}.web`} bg="var(--color-rose)" class="shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]">
-            <div class="relative m-3 h-[clamp(420px,120vw,560px)] overflow-hidden border-[3px] border-ink bg-ink sm:m-3.5 lg:h-[600px]">
-              <iframe src={pj.embed} title={`${t(pj.embedKind === 'figma' ? 'project.prototype' : 'project.site')} — ${pj.title}`} loading="lazy" allowfullscreen class="absolute inset-0 size-full border-0"></iframe>
+            {/* Façade : le site ou le prototype (service tiers, plusieurs Mo, cookies possibles) ne se charge qu'au clic */}
+            <div class="relative m-3 h-[clamp(420px,120vw,560px)] overflow-hidden border-[3px] border-ink bg-ink sm:m-3.5 lg:h-[600px]"
+              data-embed={pj.embed} data-embed-title={`${t(pj.embedKind === 'figma' ? 'project.prototype' : 'project.site')} — ${pj.title}`}>
+              {pj.thumbnails[0] && <Img src={pj.thumbnails[0]} alt="" width={1200} class="absolute inset-0 size-full object-cover object-top opacity-50" />}
+              <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 p-4 text-center">
+                <button type="button" data-embed-load
+                  class="btn-retro border-[3px] border-cream bg-bordeaux px-5 py-2.5 font-vt text-[30px] font-normal leading-none text-cream [--sh:#000] [--sh-x:5px] [--sh-y:5px] sm:text-[36px]">
+                  ▶ {t(pj.embedKind === 'figma' ? 'project.loadPrototype' : 'project.loadSite')}
+                </button>
+                <p class="m-0 max-w-[440px] bg-ink/90 px-3 py-2 text-[15px] leading-snug text-cream">
+                  {t(pj.embedKind === 'figma' ? 'project.embedNoteFigma' : 'project.embedNoteSite', { host: new URL(pj.link!).hostname })}
+                </p>
+              </div>
             </div>
             <p class="m-0 px-3 pb-3.5 font-vt text-[22px] leading-none text-ink sm:px-3.5">{t(pj.embedKind === 'figma' ? 'project.prototypeHint' : 'project.siteHint')}</p>
           </Window>
@@ -164,7 +175,7 @@ const links = [
           <p class="m-0 font-vt text-[22px] text-bordeaux md:hidden" aria-hidden="true">{t('project.swipeZap')}</p>
         </div>
         <!-- Mobile : on fait défiler les étapes à l'horizontale ; desktop : 3 colonnes -->
-        <ol class="relative m-0 flex list-none snap-x snap-mandatory gap-5 overflow-x-auto scroll-px-4 px-4 pb-4 [scrollbar-width:none] sm:scroll-px-6 sm:px-6 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:pb-0 lg:px-14" role="list">
+        <ol class="relative m-0 flex list-none snap-x snap-mandatory gap-5 overflow-x-auto scroll-px-4 px-4 pb-4 [scrollbar-width:none] sm:scroll-px-6 sm:px-6 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:pb-0 lg:px-14" role="list" tabindex="0" aria-label={t('project.stepsList')}>
           {steps.map((s) => (
             <li class="w-[82vw] max-w-[420px] shrink-0 snap-start md:w-auto md:max-w-none">
               <Window title={s.file} class="h-full shadow-[8px_8px_0_var(--color-ink)]">
@@ -197,7 +208,7 @@ const links = [
           <span class="pointer-events-none absolute top-3 left-4 font-vt text-[20px] [text-shadow:2px_2px_0_#000] sm:top-[18px] sm:left-[22px] sm:text-[30px]" aria-hidden="true">CANAL BF · {pj.title.toUpperCase()}</span>
           {!pj.video && <span class="pointer-events-none absolute bottom-3 left-4 bg-ink px-2.5 py-1 font-vt text-[20px] text-rose sm:bottom-[18px] sm:left-[22px] sm:text-[24px]">{t('project.videoTodo')}</span>}
           <!-- Tout l'écran est cliquable : la vidéo (ou, en attendant, l'image) s'ouvre en grand -->
-          <button type="button" data-zoom data-type={pj.video ? 'video' : 'image'} data-full={pj.video ?? posterFull} data-poster={posterFull}
+          <button type="button" data-zoom data-type={pj.video ? 'video' : 'image'} data-full={pj.video ?? posterFull} data-poster={posterFull} data-captions={pj.videoCaptions} data-captions-lang="fr" data-captions-label={t('project.captions')}
             data-caption={pj.title} class="group absolute inset-0 flex cursor-pointer items-center justify-center"
             aria-label={pj.video ? t('project.playVideo', { t: pj.title }) : `${t('project.zoomImageOf')} ${pj.title}`}>
             <span class="btn-retro border-[3px] border-cream bg-bordeaux px-6 py-3 font-vt text-[40px] font-normal leading-none text-cream [--sh:#000] [--sh-x:6px] [--sh-y:6px] group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 sm:px-[34px] sm:py-[18px] sm:text-[56px] sm:[--sh-x:8px] sm:[--sh-y:8px]">{pj.video ? '▶ PLAY' : t('project.see')}</span>
@@ -279,3 +290,21 @@ const links = [
     </div>
   </section>
 </Base>
+
+<script>
+  // Façade des projets intégrés : l'iframe n'est créée qu'au clic sur « Lancer… »
+  // (rien n'est demandé à Figma ou au site tiers tant que le visiteur n'a pas choisi).
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-embed-load]');
+    if (!btn) return;
+    const box = btn.closest<HTMLElement>('[data-embed]');
+    if (!box) return;
+    const frame = document.createElement('iframe');
+    frame.src = box.dataset.embed!;
+    frame.title = box.dataset.embedTitle || '';
+    frame.allowFullscreen = true;
+    frame.className = 'absolute inset-0 size-full border-0';
+    box.replaceChildren(frame);
+    frame.focus();
+  });
+</script>

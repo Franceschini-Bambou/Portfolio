@@ -7,6 +7,9 @@ import TvLayer from '../components/TvLayer.astro';
 import BootScreen from '../components/BootScreen.astro';
 import { langOf, langs, switchLang, ogLocale, useT } from '../i18n/ui';
 import '../styles/global.css';
+// polices d'affichage préchargées : le titre et les numéros de chaîne ne « sautent » pas au chargement
+import bungeeUrl from '@fontsource/bungee/files/bungee-latin-400-normal.woff2?url';
+import vt323Url from '@fontsource/vt323/files/vt323-latin-400-normal.woff2?url';
 
 interface Props {
   title: string;
@@ -17,11 +20,15 @@ interface Props {
   home?: boolean;
   /** pas de version dans l'autre langue (page 404) */
   noAlternate?: boolean;
+  /** page à ne pas faire apparaître dans les moteurs de recherche (404) */
+  noindex?: boolean;
 }
 // la langue se lit dans l'adresse : /en/... = anglais
 const lang = langOf(Astro.url.pathname);
 const t = useT(lang);
-const { title, description = t('meta.description'), label, home = false, noAlternate = false } = Astro.props;
+const { title, description = t('meta.description'), label, home = false, noAlternate = false, noindex = false } = Astro.props;
+// image affichée quand on partage un lien (LinkedIn, Discord, messageries…)
+const ogImage = new URL('/og-canal-bf.png', Astro.site);
 const fullTitle = home ? t('meta.homeTitle') : `${title} — Canal BF · Bambou Franceschini`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 // la même page dans les deux langues (pour Google : balises hreflang)
@@ -35,6 +42,8 @@ const alternates = noAlternate ? [] : langs.map((l) => ({ lang: l, href: new URL
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="preload" href={bungeeUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={vt323Url} as="font" type="font/woff2" crossorigin />
     <meta name="theme-color" content="#1D0B0C" />
     <!-- nom unique : évite que le navigateur confonde avec l'icône d'un autre site en local -->
     <link rel="icon" type="image/svg+xml" href="/favicon-canal-bf.svg" />
@@ -43,6 +52,14 @@ const alternates = noAlternate ? [] : langs.map((l) => ({ lang: l, href: new URL
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content={ogLocale[lang]} />
+    <meta property="og:site_name" content="Canal BF" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Canal BF — portfolio de Bambou Franceschini" />
+    <meta name="twitter:card" content="summary_large_image" />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="sitemap" href="/sitemap.xml" />
     {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
     {alternates.length > 0 && <link rel="alternate" hreflang="x-default" href={alternates[0].href} />}
     <ClientRouter />

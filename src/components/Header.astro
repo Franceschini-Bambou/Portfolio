@@ -16,9 +16,9 @@ const otherHref = switchLang(Astro.url.pathname, other);
 <header class="sticky top-0 z-[500] border-b-[3px] border-bordeaux bg-ink">
   <div class="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 py-2.5 sm:px-6 lg:gap-5 lg:px-10 lg:py-3.5 xl:gap-8 xl:px-12">
     <!-- Logo -->
-    <a href={routes.home[lang]} class="flex shrink-0 items-center gap-3 no-underline lg:gap-3.5" aria-label={t('nav.homeAria')}>
-      <img src="/logo-bf.webp" alt="" width="160" height="60" class="block h-11 w-auto sm:h-[52px] lg:h-[60px]" style="filter:drop-shadow(-2px 0 0 rgba(46,230,214,.7)) drop-shadow(2px 0 0 rgba(255,46,136,.7))" />
-      <span class="hidden flex-col leading-none whitespace-nowrap sm:flex lg:hidden wide:flex">
+    <a href={routes.home[lang]} class="flex shrink-0 items-center gap-3 no-underline lg:gap-3.5">
+      <img src="/logo-bf.webp" alt={t('nav.homeAria')} width="160" height="60" class="block h-11 w-auto sm:h-[52px] lg:h-[60px]" style="filter:drop-shadow(-2px 0 0 rgba(46,230,214,.7)) drop-shadow(2px 0 0 rgba(255,46,136,.7))" />
+      <span class="hidden flex-col leading-none whitespace-nowrap sm:flex lg:hidden wide:flex" aria-hidden="true">
         <span class="font-vt text-[24px] tracking-[2px] text-cream sm:text-[30px]">CANAL BF</span>
         <span class="hidden font-vt text-[20px] text-rose sm:block">Bambou Franceschini</span>
       </span>
@@ -48,17 +48,18 @@ const otherHref = switchLang(Astro.url.pathname, other);
         <span>{t('contactMe')}</span>
       </a>
       <!-- Langue : comme la touche « son bilingue » des vieilles télés -->
-      <a href={otherHref} hreflang={other} lang={other} aria-label={t('lang.switchAria')} data-lang-switch
+      <a href={otherHref} hreflang={other} lang={other} data-lang-switch
         class="remote-key flex items-center rounded-[10px] border-2 border-panel-line bg-panel p-1 font-vt text-[22px] leading-none no-underline">
         <span class:list={['rounded-md px-2 pt-1.5 pb-1', lang === 'fr' ? 'bg-bordeaux text-cream' : 'text-rose']} aria-hidden="true">FR</span>
         <span class:list={['rounded-md px-2 pt-1.5 pb-1', lang === 'en' ? 'bg-bordeaux text-cream' : 'text-rose']} aria-hidden="true">EN</span>
+        <span class="sr-only">{t('lang.switchAria')}</span>
       </a>
     </div>
 
     <!-- Mobile : chaîne en cours + bouton télécommande -->
     <div class="flex items-center gap-3 lg:hidden">
       {current > 0 && <span class="font-vt text-[28px] leading-none whitespace-nowrap text-ch-green glow-green" aria-hidden="true">CH {pad2(current)}</span>}
-      <a href={otherHref} hreflang={other} lang={other} aria-label={t('lang.switchAria')} data-lang-switch
+      <a href={otherHref} hreflang={other} lang={other} aria-label={`${other.toUpperCase()} — ${t('lang.switchAria')}`} data-lang-switch
         class="remote-key flex h-11 items-center rounded-[10px] border-2 border-panel-line bg-panel px-2.5 font-vt text-[24px] leading-none text-rose no-underline">{other.toUpperCase()}</a>
       <button type="button" data-remote-toggle aria-expanded="false" aria-controls="remote"
         class="remote-key flex h-11 items-center gap-2 rounded-[10px] border-2 border-panel-line bg-cream px-3.5 font-vt text-[24px] leading-none text-ink">

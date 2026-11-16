@@ -15,7 +15,7 @@ const t = useT(langOf(Astro.url.pathname));
       <span class="font-vt text-[20px] text-rose sm:text-[28px]">{t('legal.eyebrow')}</span>
       <h1 class="m-0 font-display text-h2-sm leading-[.9] text-cream chroma-3 sm:chroma-5">{title}</h1>
       <Window title={file} class="shadow-[8px_8px_0_var(--color-bordeaux)] sm:shadow-[12px_12px_0_var(--color-bordeaux)]">
-        <div class="legal flex flex-col gap-4 px-5 py-7 leading-[1.6] sm:px-9 sm:py-9 [&_a]:text-bordeaux [&_h2]:m-0 [&_h2]:mt-4 [&_h2]:font-display [&_h2]:text-[clamp(1.4rem,2vw,1.75rem)] [&_h2]:leading-[1.1] [&_h2]:text-bordeaux [&_p]:m-0 [&_ul]:m-0 [&_ul]:pl-6">
+        <div class="legal flex flex-col gap-4 px-5 py-7 leading-[1.6] sm:px-9 sm:py-9 [&_a]:text-bordeaux [&_a]:underline [&_a]:underline-offset-2 [&_h2]:m-0 [&_h2]:mt-4 [&_h2]:font-display [&_h2]:text-[clamp(1.4rem,2vw,1.75rem)] [&_h2]:leading-[1.1] [&_h2]:text-bordeaux [&_p]:m-0 [&_ul]:m-0 [&_ul]:pl-6">
           <slot />
         </div>
       </Window>

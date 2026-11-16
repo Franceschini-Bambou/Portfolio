@@ -72,7 +72,7 @@ const field = 'w-full border-[3px] border-ink bg-white px-4 py-3.5 font-sans tex
             <label class="flex flex-col gap-2"><span class="font-vt text-[24px] text-bordeaux">{t('contact.message')}</span><textarea required name="message" rows="7" class={`${field} resize-y leading-normal`}></textarea></label>
             <!-- Champ piège pour les robots (invisible pour les humains) -->
             <label class="absolute -left-[9999px]" aria-hidden="true">{t('contact.honeypot')}<input name="site_web" tabindex="-1" autocomplete="off" /></label>
-            <p class="m-0 text-[16px] leading-snug">{t('contact.privacy')} <a href={routes.privacy[lang]} class="text-bordeaux">{t('contact.more')}</a>.</p>
+            <p class="m-0 text-[16px] leading-snug">{t('contact.privacy')} <a href={routes.privacy[lang]} class="text-bordeaux underline underline-offset-2">{t('contact.more')}</a>.</p>
             <Btn type="submit" variant="bordeaux" prefix="● REC" class="self-start px-[30px]!">{t('contact.send')}</Btn>
             <p data-status hidden class="m-0 font-vt text-[24px] text-bordeaux" role="status"></p>
           </div>

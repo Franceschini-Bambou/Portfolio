@@ -4,12 +4,18 @@
 import { getContent } from '../lib/data';
 import { langOf, useT } from '../i18n/ui';
 const lang = langOf(Astro.url.pathname);
+const t = useT(lang);
 const { tools } = await getContent(lang);
 const marquee = [...new Set(tools.flatMap((t) => t.items).map((t) => t.toUpperCase()))];
 const items = [...marquee, ...marquee];
 ---
-<div class="overflow-hidden border-y-[3px] border-ink bg-bordeaux py-2.5 sm:py-3.5" aria-label={useT(lang)('marquee')}>
-  <ul class="m-0 flex w-max animate-marquee list-none p-0 hover:[animation-play-state:paused]" role="list">
+<div class="relative overflow-hidden border-y-[3px] border-ink bg-bordeaux py-2.5 sm:py-3.5" aria-label={t('marquee')} data-marquee>
+  <!-- Bouton pause : un texte qui défile sans fin doit pouvoir être arrêté (critère WCAG 2.2.2) -->
+  <button type="button" data-marquee-toggle aria-pressed="false" data-label-pause={t('marquee.pause')} data-label-play={t('marquee.play')}
+    class="absolute top-1/2 right-2 z-10 -translate-y-1/2 border-2 border-cream bg-ink px-2.5 py-1 font-vt text-[20px] leading-none text-cream motion-reduce:hidden sm:right-3 sm:text-[24px]">
+    ❚❚ <span class="sr-only">{t('marquee.pause')}</span>
+  </button>
+  <ul class="m-0 flex w-max animate-marquee list-none p-0 hover:[animation-play-state:paused] in-data-paused:[animation-play-state:paused]" role="list">
     {items.map((m, i) => (
       <li class="flex items-center gap-5 pr-5 font-vt text-[28px] leading-none whitespace-nowrap text-cream sm:gap-7 sm:pr-7 sm:text-[40px]" aria-hidden={i >= marquee.length ? 'true' : undefined}>
         {m}<span class="text-[20px] text-rose sm:text-[28px]" aria-hidden="true">■</span>
@@ -17,3 +23,15 @@ const items = [...marquee, ...marquee];
     ))}
   </ul>
 </div>
+
+<script>
+  // Pause / reprise de la bande défilante (au clavier comme à la souris)
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-marquee-toggle]');
+    if (!btn) return;
+    const box = btn.closest<HTMLElement>('[data-marquee]')!;
+    const paused = box.toggleAttribute('data-paused');
+    btn.setAttribute('aria-pressed', String(paused));
+    btn.innerHTML = `${paused ? '▶' : '❚❚'} <span class="sr-only">${paused ? btn.dataset.labelPlay : btn.dataset.labelPause}</span>`;
+  });
+</script>

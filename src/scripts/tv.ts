@@ -223,6 +223,20 @@ function lbShow(i: number) {
   if (isVideo) {
     img.removeAttribute('src');
     video.poster = item.dataset.poster || '';
+    video.querySelectorAll('track').forEach((tr) => tr.remove());
+    if (item.dataset.captions) {
+      // sous-titres (fichier .vtt dans PocketBase, autre domaine → demande CORS)
+      video.crossOrigin = 'anonymous';
+      const track = document.createElement('track');
+      track.kind = 'captions';
+      track.src = item.dataset.captions;
+      track.srclang = item.dataset.captionsLang || 'fr';
+      track.label = item.dataset.captionsLabel || 'Sous-titres';
+      track.default = true;
+      video.append(track);
+    } else {
+      video.removeAttribute('crossorigin');
+    }
     video.src = item.dataset.full!;
     video.play().catch(() => {}); // si le navigateur bloque la lecture auto, les contrôles restent là
   } else {

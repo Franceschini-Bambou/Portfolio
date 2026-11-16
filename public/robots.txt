@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://portfolio.bambou-franceschini.fr/sitemap.xml
